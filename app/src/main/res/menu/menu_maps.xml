@@ -4,4 +4,8 @@
     tools:context="games.voidsoft.org.bomber.MapsActivity">
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/highscore" android:title="HighScore"
+        android:orderInCategory="100" app:showAsAction="always" android:icon="@drawable/highscore" />
+    <item android:id="@+id/settings" android:title="Settings"
+        android:orderInCategory="100" app:showAsAction="always" android:icon="@drawable/ic_action_settings" />
 </menu>

@@ -23,6 +23,8 @@
     -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
 
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -57,6 +59,20 @@
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps" >
         </activity>
+        <activity
+            android:name=".FriendsActivity"
+            android:label="@string/title_activity_friends" >
+        </activity>
+        <activity
+            android:name=".DeviceListActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:label="@string/select_device"
+            android:theme="@android:style/Theme.Dialog" />
+        <!--
+        <activity
+            android:name=".costumContextMenu.ContextActivity"
+            android:label="ContextActivity"/>
+            -->
     </application>
 
 </manifest>
