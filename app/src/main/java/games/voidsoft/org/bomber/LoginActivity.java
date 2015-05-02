@@ -12,11 +12,14 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -27,8 +30,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import games.voidsoft.org.bomber.objects.User;
 
 
 /**
@@ -36,6 +44,8 @@ import java.util.List;
  */
 public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
+
+    User user;
     /**
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
@@ -86,6 +96,13 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
     }
+
+    public void buttonRegister(View view)
+    {
+        Intent i=new Intent(LoginActivity.this,RegistrationActivity.class);
+        startActivity(i);
+    }
+
 
     private void populateAutoComplete() {
         getLoaderManager().initLoader(0, null, this);
@@ -264,11 +281,28 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             mEmail = email;
             mPassword = password;
         }
+        private String readUrl(String urlString) throws Exception {
+            BufferedReader reader = null;
+            try {
+                URL url = new URL(urlString);
+                reader = new BufferedReader(new InputStreamReader(url.openStream()));
+                StringBuffer buffer = new StringBuffer();
+                int read;
+                char[] chars = new char[1024];
+                while ((read = reader.read(chars)) != -1)
+                    buffer.append(chars, 0, read);
 
+                return buffer.toString();
+            }
+            finally {
+                if (reader != null)
+                    reader.close();
+            }
+        }
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-
+/*
             try {
                 // Simulate network access.
                 Thread.sleep(2000);
@@ -282,10 +316,20 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                     // Account exists, return true if the password matches.
                     return pieces[1].equals(mPassword);
                 }
+            }*/
+            try {
+                String json = readUrl("http://192.168.0.11:9000/test/login.php");
+
+                Gson gson = new Gson();
+                user = gson.fromJson(json, User.class);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.e("Pribavljanje","Buffer",ex);
+                return false;
             }
 
-            // TODO: register the new account here.
-            return true;
         }
 
         //Ovde udje nakon izvrsenog zahteva za login

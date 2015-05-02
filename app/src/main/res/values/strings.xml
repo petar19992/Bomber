@@ -30,4 +30,5 @@
     <string name="connect">Connect a device</string>
     <string name="discoverable">Make discoverable</string>
     <string name="title_activity_icon_context_menu">IconContextMenu</string>
+    <string name="title_activity_registration">RegistrationActivity</string>
 </resources>

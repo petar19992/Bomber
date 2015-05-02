@@ -125,9 +125,9 @@ public class MapsActivity extends ActionBarActivity {
 
         contextMenuItems = new ArrayList<ContextMenuItem>();
         contextMenuItems.add(new ContextMenuItem(getResources().getDrawable(
-                R.drawable.bomb), "Facebook"));
+                R.drawable.mine), "Place Mine"));
         contextMenuItems.add(new ContextMenuItem(getResources().getDrawable(
-                R.drawable.eye), "Scanner"));
+                R.drawable.bomb), "Place C4"));
 
         adapter = new ContextMenuAdapter(this,
                 contextMenuItems);

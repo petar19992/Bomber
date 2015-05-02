@@ -72,7 +72,11 @@
         <activity
             android:name=".costumContextMenu.ContextActivity"
             android:label="ContextActivity"/>
-            -->
+        -->
+        <activity
+            android:name=".RegistrationActivity"
+            android:label="@string/title_activity_registration" >
+        </activity>
     </application>
 
 </manifest>

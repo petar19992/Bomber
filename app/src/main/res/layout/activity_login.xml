@@ -16,7 +16,8 @@
         android:layout_height="match_parent">
 
         <LinearLayout android:id="@+id/email_login_form" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:orientation="vertical">
+            android:layout_height="wrap_content" android:orientation="vertical"
+            android:layout_gravity="center">
 
             <AutoCompleteTextView android:id="@+id/email" android:layout_width="match_parent"
                 android:layout_height="wrap_content" android:hint="@string/prompt_email"
@@ -29,11 +30,19 @@
                 android:imeActionLabel="@string/action_sign_in_short"
                 android:imeOptions="actionUnspecified" android:inputType="textPassword"
                 android:maxLines="1" android:singleLine="true" />
+            <TableLayout android:id="@+id/login_buttons" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="horizontal">
+                <Button android:id="@+id/email_sign_in_button" style="?android:textAppearanceSmall"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp" android:text="@string/action_sign_in"
+                    android:textStyle="bold" />
+                <Button android:id="@+id/email_register_button" style="?android:textAppearanceSmall"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp" android:text="@string/action_register"
+                    android:textStyle="bold"
+                    android:onClick="buttonRegister"/>
+                </TableLayout>
 
-            <Button android:id="@+id/email_sign_in_button" style="?android:textAppearanceSmall"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:layout_marginTop="16dp" android:text="@string/action_sign_in"
-                android:textStyle="bold" />
 
         </LinearLayout>
     </ScrollView>

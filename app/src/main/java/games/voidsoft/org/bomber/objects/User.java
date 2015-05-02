@@ -13,6 +13,9 @@ public class User {
     String email;
     String money;
     Place currentPlace;
+    public List<User> friends;
+    public List<Bomb> bombs;
+    //{'name':'petar','username':'petar19992','password':'fulcrummig','email':'petar@gmail.com','money':'100','currentPlace':{'longitude':23.1542,'latitude':21.2452},'friends':[],'bombs':[]}
 
     public Place getCurrentPlace() {
         return currentPlace;
@@ -30,8 +33,7 @@ public class User {
         this.bombs = bombs;
     }
 
-    public List<User> friends;
-    public List<Bomb> bombs;
+
 
     public User(List<Bomb> bombs, String name, String username, String password, String email, String money, Place currentPlace, List<User> friends) {
         this.bombs = bombs;
