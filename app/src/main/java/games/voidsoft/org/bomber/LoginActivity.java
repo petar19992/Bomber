@@ -36,6 +36,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import games.voidsoft.org.bomber.objects.Singleton;
 import games.voidsoft.org.bomber.objects.User;
 
 
@@ -318,9 +319,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 }
             }*/
             try {
-                String json = readUrl("http://192.168.0.11:9000/test/login.php");
+                String json = readUrl("http://voidsoft.in.rs/bomber/login.php");
 
-                Gson gson = new Gson();
+                Gson gson=  new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").create();
+
                 user = gson.fromJson(json, User.class);
                 return true;
             }
@@ -340,6 +342,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
             if (success) {
                 //finish();
+                Singleton.getInstance().setUser(user);
                 Intent mainIntent = new Intent(LoginActivity.this,MapsActivity.class);
                 LoginActivity.this.startActivity(mainIntent);
                 LoginActivity.this.finish();
@@ -356,6 +359,38 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         }
     }
 }
+/*
+*
+C:\Users\Petar\.android>keytool -list -v -keystore "C:\Users\Petar\.android\debu
+g.keystore" -alias androiddebugkey -storepass android -keypass android
+Alias name: androiddebugkey
+Creation date: Apr 24, 2015
+Entry type: PrivateKeyEntry
+Certificate chain length: 1
+Certificate[1]:
+Owner: CN=Android Debug, O=Android, C=US
+Issuer: CN=Android Debug, O=Android, C=US
+Serial number: 2ce78ddd
+Valid from: Fri Apr 24 19:14:00 CEST 2015 until: Sun Apr 16 19:14:00 CEST 2045
+Certificate fingerprints:
+         MD5:  72:8E:D4:67:7F:D1:98:0E:1E:E1:A1:A7:35:DF:03:8C
+         SHA1: 87:7F:FE:CA:75:65:00:6E:C5:AA:A0:2D:28:B4:68:8F:3C:8D:B1:1E
+         SHA256: 08:49:7E:2A:E6:83:04:BF:7B:01:26:7B:47:C1:0A:D1:BD:5D:E6:65:FF:
+B7:20:10:58:41:64:21:43:DF:62:03
+         Signature algorithm name: SHA256withRSA
+         Version: 3
 
+Extensions:
+
+#1: ObjectId: 2.5.29.14 Criticality=false
+SubjectKeyIdentifier [
+KeyIdentifier [
+0000: BF 52 2C 40 5B 33 05 41   17 DD 21 AE 6A 65 E4 AF  .R,@[3.A..!.je..
+0010: B6 5E 38 3C                                        .^8<
+]
+]
+
+
+C:\Users\Petar\.android>*/
 
 

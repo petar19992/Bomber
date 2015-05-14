@@ -2,6 +2,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="games.voidsoft.org.bomber" >
 
+    <!-- Za servis koji se sam pali nakon gasenja telefona -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <action android:name="android.intent.action.BOOT_COMPLETED" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+
+    <!-- Za kameru -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <!-- Ja sam dodao -->
     <permission
         android:name="games.voidsoft.org.permission.MAPS_RECEIVE"
@@ -37,7 +49,7 @@
         android:theme="@style/AppTheme" >
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyDSZWHB6N8KB94aJWdZs4NJab6f0D8FyWs" />
+            android:value="AIzaSyB7vV-vt14QBE7_GlJVZTrwubPjW-marlE" />
 
         <activity
             android:name=".SplashActivity"
@@ -77,6 +89,18 @@
             android:name=".RegistrationActivity"
             android:label="@string/title_activity_registration" >
         </activity>
+        <service
+            android:name="games.voidsoft.org.bomber.service.UpdateService"
+            android:label="UpdateService" >
+            <intent-filter>
+                <action android:name="games.voidsoft.org.bomber.action.UPDATE" />
+            </intent-filter>
+        </service>
+        <receiver android:name="games.voidsoft.org.bomber.service.BootCompletedIntentReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

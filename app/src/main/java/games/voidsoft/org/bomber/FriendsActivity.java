@@ -1,30 +1,32 @@
-package games.voidsoft.org.bomber;
+        package games.voidsoft.org.bomber;
 
-import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.content.Intent;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
-import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.Window;
-import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
+        import android.app.Activity;
+        import android.app.AlertDialog;
+        import android.bluetooth.BluetoothAdapter;
+        import android.bluetooth.BluetoothDevice;
+        import android.content.DialogInterface;
+        import android.content.Intent;
+        import android.os.Bundle;
+        import android.os.Handler;
+        import android.os.Message;
+        import android.support.v7.app.ActionBarActivity;
+        import android.util.Log;
+        import android.view.KeyEvent;
+        import android.view.Menu;
+        import android.view.MenuInflater;
+        import android.view.MenuItem;
+        import android.view.View;
+        import android.view.Window;
+        import android.view.View.OnClickListener;
+        import android.view.inputmethod.EditorInfo;
+        import android.widget.ArrayAdapter;
+        import android.widget.Button;
+        import android.widget.EditText;
+        import android.widget.ListView;
+        import android.widget.TextView;
+        import android.widget.Toast;
 
-import games.voidsoft.org.bomber.connection.BluetoothChatService;
+        import games.voidsoft.org.bomber.connection.BluetoothChatService;
 
 
 public class FriendsActivity extends ActionBarActivity {
@@ -132,11 +134,9 @@ public class FriendsActivity extends ActionBarActivity {
         mConversationArrayAdapter = new ArrayAdapter<String>(this, R.layout.message);
         mConversationView = (ListView) findViewById(R.id.in);
         mConversationView.setAdapter(mConversationArrayAdapter);
-
         // Initialize the compose field with a listener for the return key
         mOutEditText = (EditText) findViewById(R.id.edit_text_out);
         mOutEditText.setOnEditorActionListener(mWriteListener);
-
         // Initialize the send button with a listener that for click events
         mSendButton = (Button) findViewById(R.id.button_send);
         mSendButton.setOnClickListener(new OnClickListener() {
@@ -146,7 +146,6 @@ public class FriendsActivity extends ActionBarActivity {
                 String message = view.getText().toString();
                 sendMessage(message);
             }
-
         });
 */
         // Initialize the BluetoothChatService to perform bluetooth connections
@@ -205,7 +204,8 @@ public class FriendsActivity extends ActionBarActivity {
 
             // Reset out string buffer to zero and clear the edit text field
             mOutStringBuffer.setLength(0);
-            mOutEditText.setText(mOutStringBuffer);
+            mChatService.stop();
+            //mOutEditText.setText(mOutStringBuffer);
         }
     }
 
@@ -286,7 +286,26 @@ public class FriendsActivity extends ActionBarActivity {
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
                     // Attempt to connect to the device
                     mChatService.connect(device);
-                    sendMessage("proba");
+
+                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            switch (which){
+                                case DialogInterface.BUTTON_POSITIVE:
+                                    //Yes button clicked
+                                    sendMessage("proba");
+                                    break;
+
+                                case DialogInterface.BUTTON_NEGATIVE:
+                                    //No button clicked
+                                    break;
+                            }
+                        }
+                    };
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
+                            .setNegativeButton("No", dialogClickListener).show();
+
                 }
                 break;
             case REQUEST_ENABLE_BT:
@@ -295,7 +314,6 @@ public class FriendsActivity extends ActionBarActivity {
                     // Bluetooth is now enabled, so set up a chat session
                     //
                     setupChat();
-                    sendMessage("proba");
                 } else {
                     // User did not enable Bluetooth or an error occured
                     Log.d(TAG, "BT not enabled");
@@ -344,4 +362,9 @@ public class FriendsActivity extends ActionBarActivity {
     {
 
     }
+    public void buttonSend(View view)
+    {
+        sendMessage("proba");
+    }
+
 }

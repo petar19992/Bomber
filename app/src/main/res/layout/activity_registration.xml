@@ -87,6 +87,25 @@
             android:ems="10"
             android:id="@+id/editTextRePassword" />
 
+        <TableLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <TableRow>
+                <Button android:id="@+id/buttonCapture"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Take Photo!"
+                    android:onClick="buttonCapture"/>
+                <Button android:id="@+id/buttonGallery"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Chose from Galerry"
+                    android:onClick="buttonGallery"/>
+            </TableRow>
+
+            </TableLayout>
+
+
         <Button
             style="?android:attr/buttonStyleSmall"
             android:layout_marginTop="20dp"
@@ -94,7 +113,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="OK"
-            android:id="@+id/buttonOK" />
+            android:id="@+id/buttonOK"
+            android:onClick="buttonOK"/>
 
 
     </LinearLayout>
