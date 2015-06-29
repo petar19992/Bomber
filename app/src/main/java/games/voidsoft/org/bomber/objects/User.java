@@ -15,8 +15,18 @@ public class User {
     String email;
     String money;
     Place currentPlace;
-    public List<User> friends;
+    public List<Integer> friends;
     public List<Bomb> bombs;
+
+    public String getAvatarURL() {
+        return avatarURL;
+    }
+
+    public void setAvatarURL(String avatarURL) {
+        this.avatarURL = avatarURL;
+    }
+
+    public String avatarURL;
 
     public Bitmap getAvatar() {
         return avatar;
@@ -62,15 +72,15 @@ public class User {
         }
         return null;
     }
-    public void addFriend(User user)
+    public void addFriend(int user)
     {
         friends.add(user);
     }
-    public boolean deleteFriend(User user)
+    public boolean deleteFriend(int user)
     {
-        for(User u:friends)
+        for(int u:friends)
         {
-            if(user.username==u.username)
+            if(user==u)
             {
                 friends.remove(u);
                 return true;
@@ -78,7 +88,7 @@ public class User {
         }
         return false;
     }
-    public User getFriendByUsername(String username)
+ /*   public User getFriendByUsername(String username)
     {
         for(User u:friends)
         {
@@ -89,10 +99,10 @@ public class User {
         }
         return null;
     }
-
+*/
 
     public User(){}
-    public User(List<Bomb> bombs, String name, String username, String password, String email, String money, Place currentPlace, List<User> friends, Bitmap avatar) {
+    public User(List<Bomb> bombs, String name, String username, String password, String email, String money, Place currentPlace, List<Integer> friends, Bitmap avatar, String avatarURL) {
         this.bombs = bombs;
         this.name = name;
         this.username = username;
@@ -102,6 +112,7 @@ public class User {
         this.currentPlace = currentPlace;
         this.friends = friends;
         this.avatar=avatar;
+        this.avatarURL=avatarURL;
     }
 
     public String getUsername() {
@@ -136,11 +147,11 @@ public class User {
         this.money = money;
     }
 
-    public List<User> getFriends() {
+    public List<Integer> getFriends() {
         return friends;
     }
 
-    public void setFriends(List<User> friends) {
+    public void setFriends(List<Integer> friends) {
         this.friends = friends;
     }
 

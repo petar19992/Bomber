@@ -1,5 +1,7 @@
 package games.voidsoft.org.bomber.objects;
 
+import com.google.android.gms.maps.GoogleMap;
+
 /**
  * Created by Petar on 4/24/2015.
  */
@@ -13,6 +15,16 @@ public class Singleton {
     }
 
     User user;
+
+    public GoogleMap getGoogleMap() {
+        return googleMap;
+    }
+
+    public void setGoogleMap(GoogleMap googleMap) {
+        this.googleMap = googleMap;
+    }
+
+    public GoogleMap googleMap;
     private static Singleton ourInstance;
 
     public static Singleton getInstance() {

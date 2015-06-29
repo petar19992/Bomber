@@ -6,14 +6,19 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -29,9 +34,21 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -135,14 +152,14 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+        /*if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
-        }
+        }*/
 
         // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
+        /*if (TextUtils.isEmpty(email)) {
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
             cancel = true;
@@ -150,7 +167,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             mEmailView.setError(getString(R.string.error_invalid_email));
             focusView = mEmailView;
             cancel = true;
-        }
+        }*/
 
         if (cancel) {
             // There was an error; don't attempt login and focus the first
@@ -175,7 +192,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() > 0;
     }
 
     /**
@@ -300,6 +317,98 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                     reader.close();
             }
         }
+
+        ////POST METODA
+        public  String POST(String url,List<String> params,List<String> value /*, String json*/){
+            InputStream inputStream = null;
+            String result = "";
+            try {
+                // 1. create HttpClient
+                HttpClient httpclient = new DefaultHttpClient();
+
+                // 2. make POST request to the given URL
+                HttpPost httpPost = new HttpPost(url);
+
+
+
+//Deo kada se samo parametri prosledjuju
+                List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+                int i=0;
+                for(String p:params)
+                {
+                    nameValuePairs.add(new BasicNameValuePair(p, value.get(i++)));
+                }
+                httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+                HttpResponse httpResponse = httpclient.execute(httpPost);
+                Log.v("Post Status","Code: "+httpResponse.getStatusLine().getStatusCode());
+                result=String.valueOf(httpResponse.getStatusLine().getStatusCode());
+
+
+//Deo kada se prosledjuje ceo JSON
+           /* String json = "";
+            // 3. build jsonObject
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.accumulate("username", "dsa");
+            jsonObject.accumulate("password", "dsa");
+            // 4. convert JSONObject to JSON to String
+            json = jsonObject.toString();
+
+
+
+
+            // ** Alternative way to convert Person object to JSON string usin Jackson Lib
+            // ObjectMapper mapper = new ObjectMapper();
+            // json = mapper.writeValueAsString(person);
+            // 5. set json to StringEntity
+            StringEntity se = new StringEntity(json);
+            // 6. set httpPost Entity
+            httpPost.setEntity(se);
+            // 7. Set some headers to inform server about the type of the content*/
+            /*httpPost.setHeader("Accept", "application/json");
+            httpPost.setHeader("Content-type", "application/json");*/
+                // 8. Execute POST request to the given URL
+            /*
+            HttpResponse httpResponse = httpclient.execute(httpPost);
+            // 9. receive response as inputStream
+            */
+                inputStream = httpResponse.getEntity().getContent();
+                // 10. convert inputstream to string
+                if(inputStream != null) {
+                    result = convertInputStreamToString(inputStream);
+                    if(result.equals("true"))
+                    {
+                        //Ako mi bude vracao boolean ovde cu da stavim return true
+                    }
+                    else
+                    {
+
+                    }
+                }
+                else
+                    result = "Did not work!";
+
+
+            } catch (Exception e) {
+                Log.d("InputStream", e.getLocalizedMessage());
+            }
+
+            // 11. return result
+            return result;
+        }
+
+        private  String convertInputStreamToString(InputStream inputStream) throws IOException {
+            BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
+            String line = "";
+            String result = "";
+            while((line = bufferedReader.readLine()) != null)
+                result += line;
+
+            inputStream.close();
+            return result;
+
+        }
+
+
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
@@ -318,12 +427,32 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                     return pieces[1].equals(mPassword);
                 }
             }*/
+
             try {
-                String json = readUrl("http://voidsoft.in.rs/bomber/login.php");
+                //String json = readUrl("http://voidsoft.in.rs/bomber/login.php");
+                List<String> parameters=new ArrayList<String>();
+                List<String> value=new ArrayList<String>();
+                parameters.add("username");
+                value.add(this.mEmail);
+                parameters.add("password");
+                value.add(this.mPassword);
+                String json=POST("http://bomber.voidsoft.in.rs/login.php",parameters,value);
+                JsonParser parser = new JsonParser();
+                JsonObject obj = parser.parse(json).getAsJsonObject();
+                Gson gson=  new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+                //Gson gson=  new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").create();
 
-                Gson gson=  new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").create();
+                //user = gson.fromJson(json, User.class);
+                user =gson.fromJson(obj,User.class);
 
-                user = gson.fromJson(json, User.class);
+                try {
+                    Bitmap bitmap = BitmapFactory.decodeStream((InputStream) new URL(user.getAvatarURL()).getContent());
+                    user.setAvatar(bitmap);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 return true;
             }
             catch (Exception ex)
@@ -349,6 +478,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
+                Toast.makeText(getApplicationContext(),"neuspela konekcija", Toast.LENGTH_LONG).show();
             }
         }
 
@@ -392,5 +522,5 @@ KeyIdentifier [
 
 
 C:\Users\Petar\.android>*/
-
+/**/
 

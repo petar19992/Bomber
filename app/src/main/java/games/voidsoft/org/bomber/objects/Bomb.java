@@ -12,19 +12,19 @@ public class Bomb {
     int bombID;
     String type;
     Place place;
-    User user;
+    int user;
     boolean status;
     Date timePlanted;
     Date timeDefuse;
     Date timeExplode;
-    User defusedBy;
-    int[] killedUsersID;
+    int defusedBy;
+    List<Integer> killedUsers;
 
     public Bomb()
     {
-        this.killedUsersID=new int[]
+        this.killedUsers= new ArrayList<Integer>();
     }
-    public Bomb(int bombID, String type, Place place, User user, boolean status, Date timePlanted, Date timeDefuse, Date timeExplode, User defusedBy, int[] killedUsersID) {
+    public Bomb(int bombID, String type, Place place, int user, boolean status, Date timePlanted, Date timeDefuse, Date timeExplode, int defusedBy, List<Integer> killedUsersID) {
         this.bombID = bombID;
         this.type = type;
         this.place = place;
@@ -34,7 +34,7 @@ public class Bomb {
         this.timeDefuse = timeDefuse;
         this.timeExplode = timeExplode;
         this.defusedBy = defusedBy;
-        this.killedUsersID = killedUsersID;
+        this.killedUsers = killedUsersID;
     }
 
     public int getBombID() {
@@ -61,11 +61,11 @@ public class Bomb {
         this.place = place;
     }
 
-    public User getUser() {
+    public int getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(int user) {
         this.user = user;
     }
 
@@ -101,19 +101,19 @@ public class Bomb {
         this.timeExplode = timeExplode;
     }
 
-    public User getDefusedBy() {
+    public int getDefusedBy() {
         return defusedBy;
     }
 
-    public void setDefusedBy(User defusedBy) {
+    public void setDefusedBy(int defusedBy) {
         this.defusedBy = defusedBy;
     }
 
-    public List<User> getKilledUsers() {
+    public List<Integer> getKilledUsers() {
         return killedUsers;
     }
 
-    public void setKilledUsers(List<User> killedUsers) {
+    public void setKilledUsers(List<Integer> killedUsers) {
         this.killedUsers = killedUsers;
     }
 }
