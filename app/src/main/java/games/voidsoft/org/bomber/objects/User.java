@@ -8,7 +8,30 @@ import java.util.List;
  * Created by Petar on 4/19/2015.
  */
 public class User {
+    public int getUserID() {
+        return userID;
+    }
+
+    public void setUserID(int userID) {
+        this.userID = userID;
+    }
+
+    public User(int userID, String name, String username, String password, String email, String money, Place currentPlace, List<Integer> friends, List<Bomb> bombs, String avatarURL, Bitmap avatar) {
+        this.userID = userID;
+        this.name = name;
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.money = money;
+        this.currentPlace = currentPlace;
+        this.friends = friends;
+        this.bombs = bombs;
+        this.avatarURL = avatarURL;
+        this.avatar = avatar;
+    }
+
     //Parameters
+    int userID;
     String name;
     String username;
     String password;
@@ -17,6 +40,22 @@ public class User {
     Place currentPlace;
     public List<Integer> friends;
     public List<Bomb> bombs;
+    public List<Bomb> friendsBombs;
+
+    public User(int userID, String name, String username, String password, String email, String money, Place currentPlace, List<Integer> friends, List<Bomb> bombs, List<Bomb> friendsBombs, String avatarURL, Bitmap avatar) {
+        this.userID = userID;
+        this.name = name;
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.money = money;
+        this.currentPlace = currentPlace;
+        this.friends = friends;
+        this.bombs = bombs;
+        this.friendsBombs = friendsBombs;
+        this.avatarURL = avatarURL;
+        this.avatar = avatar;
+    }
 
     public String getAvatarURL() {
         return avatarURL;

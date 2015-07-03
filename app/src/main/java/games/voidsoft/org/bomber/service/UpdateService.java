@@ -21,10 +21,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -49,6 +46,7 @@ import java.util.List;
 import games.voidsoft.org.bomber.MapsActivity;
 import games.voidsoft.org.bomber.R;
 import games.voidsoft.org.bomber.objects.Singleton;
+import games.voidsoft.org.bomber.objects.Status;
 import games.voidsoft.org.bomber.objects.User;
 
 /**
@@ -62,11 +60,13 @@ public final class UpdateService extends Service implements LocationListener{
     public static final String LonValue="LonKey";
     public static final String UsernameValue="UsernameKey";
     public static final String UserIDValue="UserIDKey";
+    public static final String PasswordValue="PasswordKey";
 
 
     public static final String ACTION_UPDATE = "games.voidsoft.org.bomber.action.UPDATE";
     private final static IntentFilter sIntentFilter;
     User user;
+    Status status;
     private MyAsyncTaskInMaps mAuthTask = null;
 
 
@@ -159,6 +159,8 @@ public final class UpdateService extends Service implements LocationListener{
                     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, UpdateService.this);
                 }
 
+
+
                 String url="http://bomber.voidsoft.in.rs/updateUserLoc.php";
                 List<String> parameters=new ArrayList<String>();
                 List<String> value=new ArrayList<String>();
@@ -212,6 +214,42 @@ public final class UpdateService extends Service implements LocationListener{
     protected void cancelNotification() {
         Log.i("Cancel", "notification");
         mNotificationManager.cancel(notificationID);
+    }
+
+    protected void displayNotification(NotificationProperties notificationProperties) {
+        Log.i("Start", "notification");
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(notificationProperties.getIconID())
+                        .setContentTitle(notificationProperties.getContentTitle())
+                        .setContentText(notificationProperties.getContentText())
+                        .setSound(notificationProperties.getSound());
+        // Creates an explicit intent for an Activity in your app
+        Intent resultIntent = new Intent(this, notificationProperties.getTargetActivity());
+
+        // The stack builder object will contain an artificial back stack for the
+        // started Activity.
+        // This ensures that navigating backward from the Activity leads out of
+        // your application to the Home screen.
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        // Adds the back stack for the Intent (but not the Intent itself)
+        stackBuilder.addParentStack(notificationProperties.getTargetActivity());
+        // Adds the Intent that starts the Activity to the top of the stack
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        mBuilder.setContentIntent(resultPendingIntent);
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        // mId allows you to update the notification later on.
+        mNotificationManager.notify(notificationProperties.getNotificationID(), mBuilder.build());
+    }
+    protected void cancelAllNotification() {
+        Log.i("Cancel", "notification");
+        mNotificationManager.cancelAll();
     }
 
     /**Funkcija koja u shared Preferences stavlja neku vrednost u odredjeni kljuc*/
@@ -375,12 +413,33 @@ public final class UpdateService extends Service implements LocationListener{
             else
             {
                 try {
+
                     String result = POST(URL, Parameters, Value);
                     Result=result;
-                    if(!result.equals("0"))
-                        return true;
-                    else
-                        return false;
+                    JsonParser parser = new JsonParser();
+                    JsonObject obj = parser.parse(result).getAsJsonObject();
+                    Gson gson=  new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+                    status=gson.fromJson(obj,games.voidsoft.org.bomber.objects.Status.class);
+
+
+                    List<String> parameters=new ArrayList<String>();
+                    List<String> value=new ArrayList<String>();
+                    parameters.add("username");
+                    value.add(sharedpreferences.getString(UsernameValue,""));
+                    parameters.add("password");
+                    value.add(sharedpreferences.getString(PasswordValue,""));
+                    String json=POST("http://bomber.voidsoft.in.rs/login.php",parameters,value);
+                    parser = new JsonParser();
+                    obj = parser.parse(json).getAsJsonObject();
+                    gson=  new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+                    //Gson gson=  new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").create();
+
+                    //user = gson.fromJson(json, User.class);
+                    user =gson.fromJson(obj,User.class);
+
+
+
+                    return true;
                 }
                 catch (Exception ex)
                 {
@@ -397,7 +456,15 @@ public final class UpdateService extends Service implements LocationListener{
 
             Flag=true;
             if (success) {
-                displayNotification();
+                if(status.getC4KillMe()!=0)
+                    displayNotification(new NotificationProperties(R.drawable.bomb_mini,"OUCH",String.valueOf(status.getC4KillMe())+" C4 bombs kills YOU",Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.explosion),MapsActivity.class,100));
+                if(status.getMineKillMe()!=0)
+                    displayNotification(new NotificationProperties(R.drawable.bomb_mini,"OUCH",String.valueOf(status.getMineKillMe())+" MINES kills YOU",Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.explosion),MapsActivity.class,200));
+                if(status.getC4IKill()!=0)
+                    displayNotification(new NotificationProperties(R.drawable.winflag,"YEAH !",String.valueOf(status.getC4IKill())+" peoples were killed by YOUR C4 bombs",Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.win),MapsActivity.class,300));
+                if(status.getMineIKill()!=0)
+                    displayNotification(new NotificationProperties(R.drawable.winflag,"YEAH !",String.valueOf(status.getMineIKill())+" peoples were killed by YOUR MINES",Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.win),MapsActivity.class,400));
+                status.clearAll();
             } else {
 
             }

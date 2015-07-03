@@ -190,7 +190,7 @@ public class RegistrationActivity extends Activity {
             return O;
         }
 
-
+        public int ID;
 
         public MyAsyncTaskInMaps(String url, List<String> parameters, List<String> value) {
             URL=url;
@@ -305,12 +305,15 @@ public class RegistrationActivity extends Activity {
                 try {
                     String result = POST(URL, Parameters, Value);
                     Result=result;
-                    if(result.equals("true"))
+                    try
                     {
+                        ID=Integer.valueOf(result);
                         return true;
                     }
-                    else
+                    catch (Exception ex){
                         return false;
+
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -327,7 +330,7 @@ public class RegistrationActivity extends Activity {
 
             Flag=true;
             if (success) {
-                User user=new User(new ArrayList<Bomb>(), name.getText().toString(),username.getText().toString(),password.getText().toString(),email.getText().toString(), "100", new Place(),new ArrayList<Integer>(), bmp,null);
+                User user=new User(ID, name.getText().toString(),username.getText().toString(),password.getText().toString(),email.getText().toString(), "100", new Place(),new ArrayList<Integer>(),new ArrayList<Bomb>(),new ArrayList<Bomb>(),"http://bomber.voidsoft.in.rs/uploadedimages/"+username.getText().toString()+".bmp", bmp);
                 Singleton.getInstance().setUser(user);
                 Intent mainIntent = new Intent(RegistrationActivity.this,MapsActivity.class);
                 RegistrationActivity.this.startActivity(mainIntent);

@@ -6,6 +6,8 @@
         import android.bluetooth.BluetoothDevice;
         import android.content.DialogInterface;
         import android.content.Intent;
+        import android.net.Uri;
+        import android.os.AsyncTask;
         import android.os.Bundle;
         import android.os.Handler;
         import android.os.Message;
@@ -26,10 +28,34 @@
         import android.widget.TextView;
         import android.widget.Toast;
 
+        import com.google.gson.Gson;
+        import com.google.gson.GsonBuilder;
+        import com.google.gson.JsonObject;
+        import com.google.gson.JsonParser;
+
+        import org.apache.http.HttpResponse;
+        import org.apache.http.NameValuePair;
+        import org.apache.http.client.HttpClient;
+        import org.apache.http.client.entity.UrlEncodedFormEntity;
+        import org.apache.http.client.methods.HttpPost;
+        import org.apache.http.impl.client.DefaultHttpClient;
+        import org.apache.http.message.BasicNameValuePair;
+
+        import java.io.BufferedReader;
+        import java.io.IOException;
+        import java.io.InputStream;
+        import java.io.InputStreamReader;
+        import java.net.URL;
+        import java.util.ArrayList;
+        import java.util.List;
+
         import games.voidsoft.org.bomber.connection.BluetoothChatService;
+        import games.voidsoft.org.bomber.objects.Singleton;
+        import games.voidsoft.org.bomber.objects.User;
+        import games.voidsoft.org.bomber.service.NotificationProperties;
 
 
-public class FriendsActivity extends ActionBarActivity {
+        public class FriendsActivity extends ActionBarActivity {
 
     private static final String TAG = "BluetoothChat";
     private static final boolean D = true;
@@ -66,14 +92,15 @@ public class FriendsActivity extends ActionBarActivity {
     // Member object for the chat services
     private BluetoothChatService mChatService = null;
 
-
+    User user;
+    private MyAsyncTaskInMaps mAuthTask = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if(D) Log.e(TAG, "+++ ON CREATE +++");
         setContentView(R.layout.activity_friends);
-
+        user= Singleton.getInstance().getUser();
         //requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         //getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
 
@@ -257,6 +284,15 @@ public class FriendsActivity extends ActionBarActivity {
                     String readMessage = new String(readBuf, 0, msg.arg1);
                     //mConversationArrayAdapter.add(mConnectedDeviceName+":  " + readMessage);
                     Toast.makeText(getApplicationContext(), readMessage, Toast.LENGTH_LONG).show();
+                    String url="http://bomber.voidsoft.in.rs/addFriend.php";
+                    List<String> parameters=new ArrayList<String>();
+                    List<String> value=new ArrayList<String>();
+                    parameters.add("userID1");
+                    value.add(String.valueOf(user.getUserID()));
+                    parameters.add("userID2");
+                    value.add(readMessage);
+                    mAuthTask = new MyAsyncTaskInMaps(url, parameters, value);
+                    mAuthTask.execute((Void) null);
                     break;
                 //Ovaj deo mi je sad mnogo bitan jer mi tako salje neko svoje ime
                 case MESSAGE_DEVICE_NAME:
@@ -302,10 +338,6 @@ public class FriendsActivity extends ActionBarActivity {
                             }
                         }
                     };
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
-                            .setNegativeButton("No", dialogClickListener).show();
-
                 }
                 break;
             case REQUEST_ENABLE_BT:
@@ -364,7 +396,161 @@ public class FriendsActivity extends ActionBarActivity {
     }
     public void buttonSend(View view)
     {
-        sendMessage("proba");
+        sendMessage(String.valueOf(user.getUserID()));
     }
 
+
+            public class MyAsyncTaskInMaps extends AsyncTask<Void, Void, Boolean> {
+
+
+                private final String URL;
+                private final List<String> Parameters;
+                private final List<String> Value;
+                public Object O;
+                public String Result;
+                public boolean Flag;
+
+                public String getResult() {
+                    return Result;
+                }
+
+                public Object getO() {
+                    return O;
+                }
+
+
+                public MyAsyncTaskInMaps(String url, List<String> parameters, List<String> value) {
+                    URL = url;
+                    Parameters = parameters;
+                    Value = value;
+                    O = null;
+                    Flag = false;
+                }
+
+                public MyAsyncTaskInMaps(String url, List<String> parameters, List<String> value, Object o) {
+                    URL = url;
+                    Parameters = parameters;
+                    Value = value;
+                    O = o;
+                    Flag = false;
+                }
+
+                //Funkcija koja samo cita URL, bez argumenata za POST i GET metodu
+                private String readUrl(String urlString) throws Exception {
+                    BufferedReader reader = null;
+                    try {
+                        java.net.URL url = new java.net.URL(urlString);
+                        reader = new BufferedReader(new InputStreamReader(url.openStream()));
+                        StringBuffer buffer = new StringBuffer();
+                        int read;
+                        char[] chars = new char[1024];
+                        while ((read = reader.read(chars)) != -1)
+                            buffer.append(chars, 0, read);
+                        return buffer.toString();
+                    } finally {
+                        if (reader != null)
+                            reader.close();
+                    }
+                }
+
+                ////POST METODA
+                public String POST(String url, List<String> params, List<String> value) {
+                    InputStream inputStream = null;
+                    String result = "";
+                    try {
+                        // 1. create HttpClient
+                        HttpClient httpclient = new DefaultHttpClient();
+                        // 2. make POST request to the given URL
+                        HttpPost httpPost = new HttpPost(url);
+                        //Deo kada se samo parametri prosledjuju
+                        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+                        int i = 0;
+                        for (String p : params) {
+                            nameValuePairs.add(new BasicNameValuePair(p, value.get(i++)));
+                        }
+                        httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+                        HttpResponse httpResponse = httpclient.execute(httpPost);
+                        Log.v("Post Status", "Code: " + httpResponse.getStatusLine().getStatusCode());
+                        result = String.valueOf(httpResponse.getStatusLine().getStatusCode());
+
+                        inputStream = httpResponse.getEntity().getContent();
+                        // 10. convert inputstream to string
+                        if (inputStream != null) {
+                            result = convertInputStreamToString(inputStream);
+                            if (result.equals("true")) {
+                                //Ako mi bude vracao boolean ovde cu da stavim return true
+                            } else {
+
+                            }
+                        } else
+                            result = "Did not work!";
+                    } catch (Exception e) {
+                        Log.d("InputStream", e.getLocalizedMessage());
+                    }
+
+                    return result;
+                }
+
+                private String convertInputStreamToString(InputStream inputStream) throws IOException {
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                    String line = "";
+                    String result = "";
+                    while ((line = bufferedReader.readLine()) != null)
+                        result += line;
+
+                    inputStream.close();
+                    return result;
+
+                }
+
+                @Override
+                protected Boolean doInBackground(Void... params) {
+                    // TODO: attempt authentication against a network service.
+
+                    if (O != null) {
+                        try {
+                            String json = POST(URL, Parameters, Value);
+                            JsonParser parser = new JsonParser();
+                            JsonObject obj = parser.parse(json).getAsJsonObject();
+                            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+                            O = gson.fromJson(obj, O.getClass());
+                            return true;
+                        } catch (Exception ex) {
+                            Log.e("Pribavljanje", "Buffer", ex);
+                            return false;
+                        }
+                    } else {
+                        try {
+
+                            String result = POST(URL, Parameters, Value);
+                            Result = result;
+                            if(Result.equals("true"))
+                                return true;
+                            else
+                                return false;
+                        } catch (Exception ex) {
+                            Log.e("Pribavljanje", "Buffer", ex);
+                            return false;
+                        }
+                    }
+
+                }
+
+                //Ovde udje nakon izvrsenog zahteva za login
+                @Override
+                protected void onPostExecute(final Boolean success) {
+
+                    Flag = true;
+                    if (success) {
+                        Toast.makeText(getApplicationContext(),"postali prijatelji",Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(),"nisu postali prijatelji",Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                protected void onCancelled() {
+
+                }
+            }
 }

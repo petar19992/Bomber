@@ -1,75 +1,56 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
     tools:context="games.voidsoft.org.bomber.MapsActivity">
+
     <TableLayout
-        android:id="@+id/layoutAvatar"
+        android:id="@+id/layoutButtons"
         android:layout_width="fill_parent"
         android:layout_height="50dp"
-        android:orientation="horizontal">
-        <TableRow>
-            <TextView
-                android:id="@+id/header"
-                android:text=""
-                android:layout_width="150dp"
-                android:layout_height="50dp"
-                android:layout_gravity="left"/>
-            <ImageView android:id="@+id/imageview1"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:scaleType="centerCrop"/>
-        </TableRow>
+        android:orientation="horizontal"
+        android:gravity="bottom"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
 
-        </TableLayout>
+        <TableRow
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:id="@+id/tableRow"
+            >
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Place bomb"
+            android:id="@+id/button"
+            android:onClick="buttonPlaceBomb" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Find bomb"
+            android:id="@+id/buttonFindBomb"
+            android:onClick="buttonTry"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Friends"
+                android:id="@+id/buttonFriends"
+                android:onClick="buttonFirends" />
+        </TableRow>
+    </TableLayout>
 
     <fragment
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.MapFragment"
-        android:layout_below="@+id/layoutAvatar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/button" />
+        />
 
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Place bomb here !"
-        android:id="@+id/button"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginBottom="133dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:onClick="buttonPlaceBomb"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Try to find bomb"
-        android:id="@+id/buttonFindBomb"
-        android:layout_below="@+id/map"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="68dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:onClick="buttonTry"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Friends"
-        android:id="@+id/buttonFriends"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:onClick="buttonFirends"/>
-
-</RelativeLayout>
+</LinearLayout>

@@ -10,9 +10,12 @@ import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import com.google.gson.Gson;
@@ -62,6 +65,13 @@ import games.voidsoft.org.bomber.objects.User;
  */
 public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
+    public static SharedPreferences sharedpreferences;
+    public static final String MyPREFERENCES = "MyPrefs" ;
+    public static final String LatValue="LatKey";
+    public static final String LonValue="LonKey";
+    public static final String UsernameValue="UsernameKey";
+    public static final String UserIDValue="UserIDKey";
+    public static final String PasswordValue="PasswordKey";
 
     User user;
     /**
@@ -86,7 +96,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
+        sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_APPEND);
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
@@ -113,6 +123,13 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     public void buttonRegister(View view)
@@ -290,6 +307,14 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
+
+    public void shared(String key, String value)
+    {
+        SharedPreferences.Editor editor = sharedpreferences.edit();
+        editor.putString(key, value);
+        editor.commit();
+    }
+
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String mEmail;
@@ -471,6 +496,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
             if (success) {
                 //finish();
+                shared(UsernameValue,user.getUsername());
+                shared(PasswordValue,user.getPassword());
                 Singleton.getInstance().setUser(user);
                 Intent mainIntent = new Intent(LoginActivity.this,MapsActivity.class);
                 LoginActivity.this.startActivity(mainIntent);

@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.IBinder;
@@ -99,7 +100,9 @@ public class MapsActivity extends ActionBarActivity {
     public GoogleMap googleMap;
     public LatLng myLoc;
 
-    ImageView avatar;
+    //ImageView avatar;
+
+    private static NotificationManager mNotificationManager;
 
     //Za asinhroni task
     private MyAsyncTaskInMaps mAuthTask = null;
@@ -110,15 +113,19 @@ public class MapsActivity extends ActionBarActivity {
         setContentView(R.layout.activity_maps);
         user= Singleton.getInstance().getUser();
         sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_APPEND);
-
-        TextView money=(TextView)findViewById(R.id.header);
-        money.setText(user.getMoney());
-        avatar=(ImageView)findViewById(R.id.imageview1);
+        mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        try {
+            cancelAllNotification();
+        }
+        catch (Exception e)
+        {}
+        /*avatar=(ImageView)findViewById(R.id.imageview1);
         try
         {
             avatar.setImageBitmap(user.getAvatar());
         }
-        catch (Exception ex){}
+        catch (Exception ex){}*/
 
         googleMap=((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
         googleMap.setMyLocationEnabled(true);
@@ -127,11 +134,21 @@ public class MapsActivity extends ActionBarActivity {
         googleMap.clear();
         Singleton.getInstance().setGoogleMap(googleMap);
 
+
+        boolean isMine;// Cija je bomba, true je moja, false je od prijatelja
+        isMine=true;
         for(Bomb b:user.bombs)
         {
             if(b.isStatus())
-                placeBombAt(new LatLng(b.getPlace().getLatitude(),b.getPlace().getLongitude()),b.getType());
+                placeBombAt(new LatLng(b.getPlace().getLatitude(),b.getPlace().getLongitude()),b.getType(),isMine );
                 //googleMap.addMarker(new MarkerOptions().position(new LatLng(b.getPlace().getLatitude(),b.getPlace().getLongitude())).title(b.getType()+" placed at " + b.getTimePlanted()));
+        }
+        isMine=false;
+        for(Bomb b:user.friendsBombs)
+        {
+            if(b.isStatus())
+                placeBombAt(new LatLng(b.getPlace().getLatitude(),b.getPlace().getLongitude()),b.getType(),isMine);
+            //googleMap.addMarker(new MarkerOptions().position(new LatLng(b.getPlace().getLatitude(),b.getPlace().getLongitude())).title(b.getType()+" placed at " + b.getTimePlanted()));
         }
         //CameraUpdate update= CameraUpdateFactory.newLatLng(new LatLng(43.337165,21.876526));
         //CameraUpdate update= CameraUpdateFactory.newLatLngZoom(new LatLng(43.337165, 21.876526), 12);
@@ -150,6 +167,22 @@ public class MapsActivity extends ActionBarActivity {
             // Get extra data included in the Intent
             String message = intent.getStringExtra("message");
             Log.d("receiver", "Got message: " + message);
+            //googleMap.clear();
+            //boolean isMine;// Cija je bomba, true je moja, false je od prijatelja
+           /* isMine=true;
+            for(Bomb b:user.bombs)
+            {
+                if(b.isStatus())
+                    placeBombAt(new LatLng(b.getPlace().getLatitude(),b.getPlace().getLongitude()),b.getType(),isMine );
+                //googleMap.addMarker(new MarkerOptions().position(new LatLng(b.getPlace().getLatitude(),b.getPlace().getLongitude())).title(b.getType()+" placed at " + b.getTimePlanted()));
+            }
+            isMine=false;
+            for(Bomb b:user.friendsBombs)
+            {
+                if(b.isStatus())
+                    placeBombAt(new LatLng(b.getPlace().getLatitude(),b.getPlace().getLongitude()),b.getType(),isMine);
+                //googleMap.addMarker(new MarkerOptions().position(new LatLng(b.getPlace().getLatitude(),b.getPlace().getLongitude())).title(b.getType()+" placed at " + b.getTimePlanted()));
+            }*/
         }
     };
     public void makeText()
@@ -170,26 +203,10 @@ public class MapsActivity extends ActionBarActivity {
 
             shared(LatValue,String.valueOf(location.getLatitude()));
             shared(LonValue,String.valueOf(location.getLongitude()));
-            shared(UsernameValue,user.getUsername());
-            //deo zaduzen za updateovanje lokacije korisnika
-            /*mAuthTask = new UserLoginTask(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()));
-            mAuthTask.execute((Void) null);*/
-
-
-           /*String url="http://bomber.voidsoft.in.rs/updateUserLoc.php";
-            List<String> parameters=new ArrayList<String>();
-            List<String> value=new ArrayList<String>();
-            parameters.add("username");
-            value.add(user.getUsername());
-            parameters.add("lat");
-            value.add(String.valueOf(location.getLatitude()));
-            parameters.add("lon");
-            value.add(String.valueOf(location.getLongitude()));
-            user.setCurrentPlace(new Place(location.getLongitude(),location.getLatitude()));
-            mAuthTask=new MyAsyncTaskInMaps(url,parameters,value);
-            mAuthTask.execute((Void) null);*/
+            user.setCurrentPlace(new Place(myLoc.longitude,myLoc.latitude));
         }
     };
+
 
 
 
@@ -197,7 +214,10 @@ public class MapsActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_maps, menu);
-        //menu.add(1,1,1,user.getAvatar());
+        MenuItem rec = menu.findItem(R.id.avatar);
+        rec.setIcon(new BitmapDrawable(getResources(), user.getAvatar()));
+        MenuItem rec2 = menu.findItem(R.id.money);
+        rec2.setTitle(user.getMoney());
         return true;
     }
 
@@ -230,23 +250,35 @@ public class MapsActivity extends ActionBarActivity {
         //MapsActivity.this.finish();
     }
 
-    public void placeBombAt(LatLng position,String type)
+    public void placeBombAt(LatLng position,String type, boolean isMine)
     {
-        if(type.equals("mine"))
+        if(type.equals("MINE"))
         {
+            if(isMine)
             googleMap.addMarker(new MarkerOptions().position(position)
                     .icon(BitmapDescriptorFactory.fromResource(
                             R.drawable.mine_mini))
-                            // Specifies the anchor to be at a particular point in the marker image.
                     .anchor(0.5f, 0.5f));
+            else
+                googleMap.addMarker(new MarkerOptions().position(position)
+                        .icon(BitmapDescriptorFactory.fromResource(
+                                R.drawable.minefriend))
+                        .anchor(0.5f, 0.5f));
         }
         else if(type.equals("C4"))
         {
+            if(isMine)
             googleMap.addMarker(new MarkerOptions().position(position)
                     .icon(BitmapDescriptorFactory.fromResource(
                             R.drawable.bomb_mini))
                             // Specifies the anchor to be at a particular point in the marker image.
                     .anchor(0.5f, 0.5f));
+            else
+                googleMap.addMarker(new MarkerOptions().position(position)
+                        .icon(BitmapDescriptorFactory.fromResource(
+                                R.drawable.c4friend))
+                                // Specifies the anchor to be at a particular point in the marker image.
+                        .anchor(0.5f, 0.5f));
         }
     }
     public void buttonPlaceBomb(View view)
@@ -275,15 +307,6 @@ public class MapsActivity extends ActionBarActivity {
 
                 customDialog.dismiss();
 
-               /* Bitmap.Config conf = Bitmap.Config.ARGB_8888;
-                Bitmap bmp = Bitmap.createBitmap(80, 80, conf);
-                Canvas canvas1 = new Canvas(bmp);
-
-                // paint defines the text color,
-                // stroke width, size
-                Paint color = new Paint();
-                color.setTextSize(35);
-                color.setColor(Color.BLACK);*/
                 Bomb bomb=new Bomb();
                 //bomb.setUser(user);
                 bomb.setStatus(true);
@@ -298,8 +321,25 @@ public class MapsActivity extends ActionBarActivity {
                                     R.drawable.mine_mini))
                                     // Specifies the anchor to be at a particular point in the marker image.
                             .anchor(0.5f, 0.5f));
-                    bomb.setType("mine");
+                    bomb.setType("MINE");
                     bomb.setPlace(new Place(myLoc.longitude,myLoc.latitude));
+
+                    String url="http://bomber.voidsoft.in.rs/placeBomb.php";
+                    List<String> parameters=new ArrayList<String>();
+                    List<String> value=new ArrayList<String>();
+                    parameters.add("userID");
+                    value.add(String.valueOf(user.getUserID()));
+                    parameters.add("lat");
+                    value.add(sharedpreferences.getString(LatValue,""));
+                    parameters.add("lon");
+                    value.add(sharedpreferences.getString(LonValue,""));
+                    parameters.add("type");
+                    value.add("MINE");
+                    parameters.add("timeToExplode");
+                    value.add("30"); //Ovo posle stavi opciono da bude
+                    mAuthTask = new MyAsyncTaskInMaps(url, parameters, value);
+                    mAuthTask.execute((Void) null);
+
                 }
                 else
                 if (position == 1)
@@ -310,15 +350,23 @@ public class MapsActivity extends ActionBarActivity {
                                     // Specifies the anchor to be at a particular point in the marker image.
                             .anchor(0.5f, 0.5f));
                     bomb.setType("C4");
-
-                    /*canvas1.drawBitmap(BitmapFactory.decodeResource(getResources(),
-                            R.drawable.bomb), 0,0, color);
-                    canvas1.drawText("C4!!!", 30, 40, color);
-                    googleMap.addMarker(new MarkerOptions().position(myLoc).title("C4")).setIcon(BitmapDescriptorFactory.fromBitmap(bmp));;*/
+                    String url="http://bomber.voidsoft.in.rs/placeBomb.php";
+                    List<String> parameters=new ArrayList<String>();
+                    List<String> value=new ArrayList<String>();
+                    parameters.add("userID");
+                    value.add(String.valueOf(user.getUserID()));
+                    parameters.add("lat");
+                    value.add(sharedpreferences.getString(LatValue,""));
+                    parameters.add("lon");
+                    value.add(sharedpreferences.getString(LonValue,""));
+                    parameters.add("type");
+                    value.add("C4");
+                    parameters.add("timeToExplode");
+                    value.add("30"); //Ovo posle stavi opciono da bude
+                    mAuthTask = new MyAsyncTaskInMaps(url, parameters, value);
+                    mAuthTask.execute((Void) null);
                 }
                 user.addBomb(bomb);
-                ServerConnection sc=new ServerConnection();
-                sc.uploadBomb(bomb);
 
             }
         });
@@ -337,6 +385,11 @@ public class MapsActivity extends ActionBarActivity {
         SharedPreferences.Editor editor = sharedpreferences.edit();
         editor.putString(key, value);
         editor.commit();
+    }
+
+    protected void cancelAllNotification() {
+        Log.i("Cancel", "notification");
+        mNotificationManager.cancelAll();
     }
 
     ///**asinhroni deo**////
@@ -473,7 +526,10 @@ public class MapsActivity extends ActionBarActivity {
                 try {
                     String result = POST(URL, Parameters, Value);
                     Result=result;
-                    return true;
+                    if(result.equals("true"))
+                        return true;
+                    else
+                        return false;
                 }
                 catch (Exception ex)
                 {
@@ -490,7 +546,7 @@ public class MapsActivity extends ActionBarActivity {
 
             Flag=true;
             if (success) {
-                //finish();
+                Toast.makeText(getApplicationContext(),"Bomb has been planted ! ",Toast.LENGTH_LONG).show();
             } else {
             }
         }
