@@ -3,14 +3,18 @@ package games.voidsoft.org.bomber;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
@@ -40,13 +44,18 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Time;
 import java.util.ArrayList;
@@ -59,9 +68,12 @@ import games.voidsoft.org.bomber.connection.ServerConnection;
 import games.voidsoft.org.bomber.costumContextMenu.ContextMenuAdapter;
 import games.voidsoft.org.bomber.costumContextMenu.ContextMenuItem;
 import games.voidsoft.org.bomber.objects.Bomb;
+import games.voidsoft.org.bomber.objects.Friends;
 import games.voidsoft.org.bomber.objects.Place;
 import games.voidsoft.org.bomber.objects.Singleton;
+import games.voidsoft.org.bomber.objects.Status;
 import games.voidsoft.org.bomber.objects.User;
+import games.voidsoft.org.bomber.service.NotificationProperties;
 import games.voidsoft.org.bomber.service.UpdateService;
 
 
@@ -96,6 +108,7 @@ public class MapsActivity extends ActionBarActivity {
     ContextMenuAdapter adapter;
 
     User user;
+    Status status;
 
     public GoogleMap googleMap;
     public LatLng myLoc;
@@ -103,6 +116,7 @@ public class MapsActivity extends ActionBarActivity {
     //ImageView avatar;
 
     private static NotificationManager mNotificationManager;
+    ProgressDialog dialog;
 
     //Za asinhroni task
     private MyAsyncTaskInMaps mAuthTask = null;
@@ -234,7 +248,13 @@ public class MapsActivity extends ActionBarActivity {
         //}
         if(id==R.id.highscore)
         {
-            //Toast.makeText(this,"nadam se da ovo radi",Toast.LENGTH_LONG).show();
+            String url="http://bomber.voidsoft.in.rs/RangList.php";
+            List<String> parameters=new ArrayList<String>();
+            List<String> value=new ArrayList<String>();
+            mAuthTask = new MyAsyncTaskInMaps(url, parameters, value,4);
+            mAuthTask.execute((Void) null);
+            dialog = ProgressDialog.show(this, "Loading", "Please wait...", true);
+            //http://bomber.voidsoft.in.rs/RangList.php
         }
         else if(id==R.id.settings)
         {
@@ -245,9 +265,14 @@ public class MapsActivity extends ActionBarActivity {
 
     public void buttonFirends(View view)
     {
-        Intent mainIntent = new Intent(MapsActivity.this,FriendsActivity.class);
-        MapsActivity.this.startActivity(mainIntent);
-        //MapsActivity.this.finish();
+        String url="http://bomber.voidsoft.in.rs/getFriends.php";
+        List<String> parameters=new ArrayList<String>();
+        List<String> value=new ArrayList<String>();
+        parameters.add("userID");
+        value.add(String.valueOf(user.getUserID()));
+        mAuthTask = new MyAsyncTaskInMaps(url, parameters, value,0);
+        mAuthTask.execute((Void) null);
+        dialog = ProgressDialog.show(this, "Loading", "Please wait...", true);
     }
 
     public void placeBombAt(LatLng position,String type, boolean isMine)
@@ -337,7 +362,7 @@ public class MapsActivity extends ActionBarActivity {
                     value.add("MINE");
                     parameters.add("timeToExplode");
                     value.add("30"); //Ovo posle stavi opciono da bude
-                    mAuthTask = new MyAsyncTaskInMaps(url, parameters, value);
+                    mAuthTask = new MyAsyncTaskInMaps(url, parameters, value,1);
                     mAuthTask.execute((Void) null);
 
                 }
@@ -363,7 +388,7 @@ public class MapsActivity extends ActionBarActivity {
                     value.add("C4");
                     parameters.add("timeToExplode");
                     value.add("30"); //Ovo posle stavi opciono da bude
-                    mAuthTask = new MyAsyncTaskInMaps(url, parameters, value);
+                    mAuthTask = new MyAsyncTaskInMaps(url, parameters, value,1);
                     mAuthTask.execute((Void) null);
                 }
                 user.addBomb(bomb);
@@ -377,7 +402,19 @@ public class MapsActivity extends ActionBarActivity {
         customDialog.show();
     }
     public void buttonTry(View view)
-    {}
+    {
+        String url="http://bomber.voidsoft.in.rs/tryToDefuse.php";
+        List<String> parameters=new ArrayList<String>();
+        List<String> value=new ArrayList<String>();
+        parameters.add("username");
+        value.add(String.valueOf(user.getUsername()));
+        parameters.add("lat");
+        value.add(sharedpreferences.getString(LatValue,""));
+        parameters.add("lon");
+        value.add(sharedpreferences.getString(LonValue,""));
+        mAuthTask = new MyAsyncTaskInMaps(url, parameters, value,2);
+        mAuthTask.execute((Void) null);
+    }
 
     /**Funkcija koja u shared Preferences stavlja neku vrednost u odredjeni kljuc*/
     public void shared(String key, String value)
@@ -385,6 +422,38 @@ public class MapsActivity extends ActionBarActivity {
         SharedPreferences.Editor editor = sharedpreferences.edit();
         editor.putString(key, value);
         editor.commit();
+    }
+
+    protected void displayNotification(NotificationProperties notificationProperties) {
+        Log.i("Start", "notification");
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(notificationProperties.getIconID())
+                        .setContentTitle(notificationProperties.getContentTitle())
+                        .setContentText(notificationProperties.getContentText())
+                        .setSound(notificationProperties.getSound());
+        // Creates an explicit intent for an Activity in your app
+        Intent resultIntent = new Intent(this, notificationProperties.getTargetActivity());
+
+        // The stack builder object will contain an artificial back stack for the
+        // started Activity.
+        // This ensures that navigating backward from the Activity leads out of
+        // your application to the Home screen.
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        // Adds the back stack for the Intent (but not the Intent itself)
+        stackBuilder.addParentStack(notificationProperties.getTargetActivity());
+        // Adds the Intent that starts the Activity to the top of the stack
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        mBuilder.setContentIntent(resultPendingIntent);
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        // mId allows you to update the notification later on.
+        mNotificationManager.notify(notificationProperties.getNotificationID(), mBuilder.build());
     }
 
     protected void cancelAllNotification() {
@@ -403,6 +472,7 @@ public class MapsActivity extends ActionBarActivity {
         public Object O;
         public String Result;
         public boolean Flag;
+        public int flag; //0 Ako uzimam prijatelje, 1 ako dodajem bombu, 2 ako defuzujem
 
         public String getResult() {
             return Result;
@@ -419,6 +489,14 @@ public class MapsActivity extends ActionBarActivity {
             Value=value;
             O=null;
             Flag=false;
+        }
+        public MyAsyncTaskInMaps(String url, List<String> parameters, List<String> value, int flag) {
+            URL=url;
+            Parameters=parameters;
+            Value=value;
+            O=null;
+            Flag=false;
+            this.flag=flag;
         }
         public MyAsyncTaskInMaps(String url, List<String> parameters, List<String> value,Object o) {
             URL=url;
@@ -526,10 +604,83 @@ public class MapsActivity extends ActionBarActivity {
                 try {
                     String result = POST(URL, Parameters, Value);
                     Result=result;
-                    if(result.equals("true"))
-                        return true;
+                    if(flag==1) {
+                        if (result.equals("true"))
+                            return true;
+                    }
                     else
-                        return false;
+                        if(flag==0)
+                        {
+                            /*JsonParser parser = new JsonParser();
+                            JsonObject obj = parser.parse(result).getAsJsonObject();
+                            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+                            Type listType = new TypeToken<ArrayList<Friends>>() {
+                            }.getType();
+                            List<Friends> yourClassList = new Gson().fromJson(obj, listType);
+                            Singleton.getInstance().setListOfFriends(yourClassList);*/
+                            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+                            JsonParser parser = new JsonParser();
+                            JsonArray jArray = parser.parse(result).getAsJsonArray();
+
+                            ArrayList<Friends> lcs = new ArrayList<Friends>();
+
+                            for(JsonElement obj : jArray )
+                            {
+                                Friends cse = gson.fromJson( obj , Friends.class);
+                                lcs.add(cse);
+                            }
+                            Singleton.getInstance().setListOfFriends(lcs);
+                            try {
+                                for(Friends f: lcs)
+                                {
+                                    Bitmap bitmap = BitmapFactory.decodeStream((InputStream) new URL(f.getFirendAvatarURL()).getContent());
+                                    f.setFriendAvatar(bitmap);
+                                }
+                            } catch (MalformedURLException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            return true;
+                        }
+                        else
+                            if(flag==2)
+                            {
+                                JsonParser parser = new JsonParser();
+                                JsonObject obj = parser.parse(result).getAsJsonObject();
+                                Gson gson=  new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+                                status=gson.fromJson(obj,games.voidsoft.org.bomber.objects.Status.class);
+                                return true;
+                            }
+                        else
+                            if(flag==4)
+                            {
+                                Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+                                JsonParser parser = new JsonParser();
+                                JsonArray jArray = parser.parse(result).getAsJsonArray();
+
+                                ArrayList<Friends> lcs = new ArrayList<Friends>();
+
+                                for(JsonElement obj : jArray )
+                                {
+                                    Friends cse = gson.fromJson( obj , Friends.class);
+                                    lcs.add(cse);
+                                }
+                                Singleton.getInstance().setTop3(lcs);
+                                try {
+                                    for(Friends f: lcs)
+                                    {
+                                        Bitmap bitmap = BitmapFactory.decodeStream((InputStream) new URL(f.getFirendAvatarURL()).getContent());
+                                        f.setFriendAvatar(bitmap);
+                                    }
+                                } catch (MalformedURLException e) {
+                                    e.printStackTrace();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                return true;
+                            }
+                    return false;
                 }
                 catch (Exception ex)
                 {
@@ -546,9 +697,40 @@ public class MapsActivity extends ActionBarActivity {
 
             Flag=true;
             if (success) {
-                Toast.makeText(getApplicationContext(),"Bomb has been planted ! ",Toast.LENGTH_LONG).show();
-            } else {
-            }
+
+                    if(flag==0)
+                    {
+                        dialog.dismiss();
+                        Intent mainIntent = new Intent(MapsActivity.this,FriendsActivity.class);
+                        MapsActivity.this.startActivity(mainIntent);
+                        //MapsActivity.this.finish();
+                    }
+                    else if(flag==1)
+                        Toast.makeText(getApplicationContext(),"Bomb has been planted ! ",Toast.LENGTH_LONG).show();
+                    else if(flag==2)
+                    {
+                        if(status.getC4KillMe()!=0)
+                            displayNotification(new NotificationProperties(R.drawable.bomb_mini,"OUCH",String.valueOf(status.getC4KillMe())+" C4 bombs kills YOU", Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.explosion),MapsActivity.class,100));
+                        if(status.getMineKillMe()!=0)
+                            displayNotification(new NotificationProperties(R.drawable.bomb_mini,"OUCH",String.valueOf(status.getMineKillMe())+" MINES kills YOU",Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.explosion),MapsActivity.class,200));
+                        if(status.getC4IKill()!=0)
+                            displayNotification(new NotificationProperties(R.drawable.winflag,"YEAH !",String.valueOf(status.getC4IKill())+" peoples were killed by YOUR C4 bombs",Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.win),MapsActivity.class,300));
+                        if(status.getMineIKill()!=0)
+                            displayNotification(new NotificationProperties(R.drawable.winflag,"YEAH !",String.valueOf(status.getMineIKill())+" peoples were killed by YOUR MINES",Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.win),MapsActivity.class,400));
+                        if(status.getMineIDefuse()!=0)
+                            displayNotification(new NotificationProperties(R.drawable.winflag,"YEAH !",String.valueOf(status.getMineIDefuse())+" MINES defised by YOU ",Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.win),MapsActivity.class,500));
+
+                        status.clearAll();
+                    }
+                    else
+                        if(flag==4)
+                        {
+                            dialog.dismiss();
+                            Intent mainIntent = new Intent(MapsActivity.this,ActivityRangList.class);
+                            MapsActivity.this.startActivity(mainIntent);
+                        }
+                    }
+
         }
 
         @Override

@@ -11,6 +11,24 @@ public class Status {
     int mineIKill;
     int c4IKill;
 
+    public Status(int mineIDefuse, int mineKillMe, int c4KillMe, int mineIKill, int c4IKill) {
+        this.mineIDefuse = mineIDefuse;
+        this.mineKillMe = mineKillMe;
+        this.c4KillMe = c4KillMe;
+        this.mineIKill = mineIKill;
+        this.c4IKill = c4IKill;
+    }
+
+    public int getMineIDefuse() {
+
+        return mineIDefuse;
+    }
+
+    public void setMineIDefuse(int mineIDefuse) {
+        this.mineIDefuse = mineIDefuse;
+    }
+
+    int mineIDefuse;
     public Status(int mineKillMe, int c4KillMe, int mineIKill, int c4IKill) {
         this.mineKillMe = mineKillMe;
         this.c4KillMe = c4KillMe;

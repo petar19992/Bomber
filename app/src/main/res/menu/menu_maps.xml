@@ -7,7 +7,7 @@
     <item android:id="@+id/highscore" android:title="HighScore"
         android:orderInCategory="100" app:showAsAction="always" android:icon="@drawable/highscore" />
     <item android:id="@+id/settings" android:title="Settings"
-        android:orderInCategory="100" app:showAsAction="always" android:icon="@drawable/ic_action_settings" />
+        android:orderInCategory="100" app:showAsAction="never" android:icon="@drawable/ic_action_settings" />
     <item android:id="@+id/money" android:title="Money"
         android:orderInCategory="100" app:showAsAction="always" />
 </menu>

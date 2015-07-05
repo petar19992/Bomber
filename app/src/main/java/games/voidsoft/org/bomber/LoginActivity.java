@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.CursorLoader;
@@ -92,11 +93,22 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private View mProgressView;
     private View mLoginFormView;
 
+    ProgressDialog dialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_APPEND);
+
+        if(sharedpreferences.contains(UserIDValue)||sharedpreferences.contains(UsernameValue))
+        {
+            //showProgress(true);
+            dialog = ProgressDialog.show(this, "Loading", "Please wait...", true);
+            mAuthTask = new UserLoginTask(sharedpreferences.getString(UsernameValue,""), sharedpreferences.getString(PasswordValue,""));
+            mAuthTask.execute((Void) null);
+        }
+
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
@@ -496,6 +508,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
             if (success) {
                 //finish();
+                dialog.dismiss();
                 shared(UsernameValue,user.getUsername());
                 shared(PasswordValue,user.getPassword());
                 Singleton.getInstance().setUser(user);

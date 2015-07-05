@@ -113,6 +113,10 @@
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
+        <activity
+            android:name=".ActivityRangList"
+            android:label="@string/title_activity_activity_rang_list" >
+        </activity>
     </application>
 
 </manifest>

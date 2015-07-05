@@ -4,6 +4,7 @@
         import android.app.AlertDialog;
         import android.bluetooth.BluetoothAdapter;
         import android.bluetooth.BluetoothDevice;
+        import android.content.Context;
         import android.content.DialogInterface;
         import android.content.Intent;
         import android.net.Uri;
@@ -21,6 +22,7 @@
         import android.view.Window;
         import android.view.View.OnClickListener;
         import android.view.inputmethod.EditorInfo;
+        import android.widget.AdapterView;
         import android.widget.ArrayAdapter;
         import android.widget.Button;
         import android.widget.EditText;
@@ -49,7 +51,10 @@
         import java.util.ArrayList;
         import java.util.List;
 
+        import games.voidsoft.org.bomber.arrayAdapters.ArrayAdapterFriends;
         import games.voidsoft.org.bomber.connection.BluetoothChatService;
+        import games.voidsoft.org.bomber.objectItems.ObjectItemFriend;
+        import games.voidsoft.org.bomber.objects.Friends;
         import games.voidsoft.org.bomber.objects.Singleton;
         import games.voidsoft.org.bomber.objects.User;
         import games.voidsoft.org.bomber.service.NotificationProperties;
@@ -101,13 +106,28 @@
         if(D) Log.e(TAG, "+++ ON CREATE +++");
         setContentView(R.layout.activity_friends);
         user= Singleton.getInstance().getUser();
-        //requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-        //getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
 
-        // Set up the custom title
-        /*mTitle = (TextView) findViewById(R.id.title_left_text);
-        mTitle.setText(R.string.app_name);
-        mTitle = (TextView) findViewById(R.id.title_right_text);*/
+        ListView lw=(ListView) findViewById(R.id.listView);
+        lw.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position,long arg3) {
+                view.setSelected(true);
+            }
+        });
+        try
+        {
+            List<Friends> friends=Singleton.getInstance().getListOfFriends();
+            ObjectItemFriend[] friendsData=new ObjectItemFriend[friends.size()];
+            int i=0;
+            for(i=0;i<friends.size();i++)
+            {
+                friendsData[i]=new ObjectItemFriend(friends.get(i).friendID,friends.get(i).getFriendUsername(),friends.get(i).getFriendAvatar());
+            }
+            ArrayAdapterFriends adapter=new ArrayAdapterFriends(this, R.layout.listviewfriends,friendsData);
+            lw.setAdapter(adapter);
+        }
+        catch (Exception ex)
+        {}
 
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -322,22 +342,6 @@
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
                     // Attempt to connect to the device
                     mChatService.connect(device);
-
-                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            switch (which){
-                                case DialogInterface.BUTTON_POSITIVE:
-                                    //Yes button clicked
-                                    sendMessage("proba");
-                                    break;
-
-                                case DialogInterface.BUTTON_NEGATIVE:
-                                    //No button clicked
-                                    break;
-                            }
-                        }
-                    };
                 }
                 break;
             case REQUEST_ENABLE_BT:
