@@ -98,7 +98,7 @@ public final class UpdateService extends Service implements LocationListener{
     public void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mTimeChangedReceiver);
-        Toast.makeText(getApplicationContext(), "Ugasio se", Toast.LENGTH_LONG).show();
+        //Toast.makeText(getApplicationContext(), "Ugasio se", Toast.LENGTH_LONG).show();
     }
 
     @SuppressWarnings("deprecation")
@@ -184,7 +184,7 @@ public final class UpdateService extends Service implements LocationListener{
         Log.i("Start", "notification");
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.bomb_mini)
+                        .setSmallIcon(R.drawable.mojabomba)
                         .setContentTitle("Ouch")
                         .setContentText("CT win !")
                         .setSound(Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.explosion));
@@ -433,10 +433,10 @@ public final class UpdateService extends Service implements LocationListener{
                     obj = parser.parse(json).getAsJsonObject();
                     gson=  new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
                     //Gson gson=  new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").create();
-
+                    User user2;
                     //user = gson.fromJson(json, User.class);
-                    user =gson.fromJson(obj,User.class);
-
+                    user2 =gson.fromJson(obj,User.class);
+                    Singleton.getInstance().setUser(user2);
 
 
                     return true;

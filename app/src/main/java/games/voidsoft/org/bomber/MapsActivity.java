@@ -1,6 +1,7 @@
 package games.voidsoft.org.bomber;
 
 import android.app.Dialog;
+import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
@@ -107,6 +108,7 @@ public class MapsActivity extends ActionBarActivity {
     ListView listView;
     ContextMenuAdapter adapter;
     Intent intentForService;
+    Intent intentForMinutService;
 
     User user;
     Status status;
@@ -118,6 +120,8 @@ public class MapsActivity extends ActionBarActivity {
 
     private static NotificationManager mNotificationManager;
     ProgressDialog dialog;
+
+    private IntentFilter sIntentFilter;
 
     //Za asinhroni task
     private MyAsyncTaskInMaps mAuthTask = null;
@@ -173,19 +177,26 @@ public class MapsActivity extends ActionBarActivity {
         //startService(new Intent(UpdateService.ACTION_UPDATE));
         intentForService=new Intent(this, UpdateService.class);
         startService(intentForService);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("TIME_TICK"));
+        sIntentFilter = new IntentFilter();
+        sIntentFilter.addAction(Intent.ACTION_TIME_TICK);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, sIntentFilter);
+        getApplicationContext().registerReceiver(mMessageReceiver, sIntentFilter);
+        //Intent intent = new Intent("TIME_TICK");
+        //LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
     }
     //Funkcija u koju se ulazi na svaki minut
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+   public BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             // TODO Auto-generated method stub
             // Get extra data included in the Intent
             String message = intent.getStringExtra("message");
             Log.d("receiver", "Got message: " + message);
-            //googleMap.clear();
-            //boolean isMine;// Cija je bomba, true je moja, false je od prijatelja
-           /* isMine=true;
+            user=Singleton.getInstance().getUser();
+            googleMap.clear();
+            boolean isMine;// Cija je bomba, true je moja, false je od prijatelja
+            isMine=true;
             for(Bomb b:user.bombs)
             {
                 if(b.isStatus())
@@ -198,14 +209,9 @@ public class MapsActivity extends ActionBarActivity {
                 if(b.isStatus())
                     placeBombAt(new LatLng(b.getPlace().getLatitude(),b.getPlace().getLongitude()),b.getType(),isMine);
                 //googleMap.addMarker(new MarkerOptions().position(new LatLng(b.getPlace().getLatitude(),b.getPlace().getLongitude())).title(b.getType()+" placed at " + b.getTimePlanted()));
-            }*/
+            }
         }
     };
-    public void makeText()
-    {
-        Toast.makeText(this,"Radiiiiiiiiiiiii",Toast.LENGTH_LONG).show();
-    }
-
     //Funkcija u koju ulazi kada se promeni lokacija (obicno je 4 sekunde)
     private GoogleMap.OnMyLocationChangeListener myLocationChangeListener = new GoogleMap.OnMyLocationChangeListener() {
         @Override
@@ -214,18 +220,13 @@ public class MapsActivity extends ActionBarActivity {
             myLoc=loc;
             //googleMap.addMarker(new MarkerOptions().position(loc).title("My position"));
             if(googleMap != null){
-                googleMap.animateCamera(CameraUpdateFactory.newLatLng(loc));
+                //googleMap.animateCamera(CameraUpdateFactory.newLatLng(loc));
             }
-
             shared(LatValue,String.valueOf(location.getLatitude()));
             shared(LonValue,String.valueOf(location.getLongitude()));
             user.setCurrentPlace(new Place(myLoc.longitude,myLoc.latitude));
         }
     };
-
-
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

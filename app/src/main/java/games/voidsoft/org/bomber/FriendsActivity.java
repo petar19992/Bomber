@@ -168,7 +168,7 @@
                     value.add(String.valueOf(user.getUserID()));
                     parameters.add("userID2");
                     value.add(String.valueOf(friend.getFriendID()));
-                    mAuthTask = new MyAsyncTaskInMaps(url, parameters, value);
+                    mAuthTask = new MyAsyncTaskInMaps(url, parameters, value,1);//Brisanje prijateljstva
                     mAuthTask.execute((Void) null);
                 }
 
@@ -265,8 +265,10 @@
 
             // Reset out string buffer to zero and clear the edit text field
             mOutStringBuffer.setLength(0);
-            mChatService.stop();
+            //mChatService.stop();
             //mOutEditText.setText(mOutStringBuffer);
+            Toast.makeText(this,"Friend request send !",Toast.LENGTH_LONG).show();
+            //finish();
         }
     }
 
@@ -317,16 +319,30 @@
                     // construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
                     //mConversationArrayAdapter.add(mConnectedDeviceName+":  " + readMessage);
-                    Toast.makeText(getApplicationContext(), readMessage, Toast.LENGTH_LONG).show();
-                    String url="http://bomber.voidsoft.in.rs/addFriend.php";
-                    List<String> parameters=new ArrayList<String>();
-                    List<String> value=new ArrayList<String>();
-                    parameters.add("userID1");
-                    value.add(String.valueOf(user.getUserID()));
-                    parameters.add("userID2");
-                    value.add(readMessage);
-                    mAuthTask = new MyAsyncTaskInMaps(url, parameters, value);
-                    mAuthTask.execute((Void) null);
+                    //Toast.makeText(getApplicationContext(), readMessage, Toast.LENGTH_LONG).show();
+                    if(readMessage.equals("truee"))
+                    {
+                        Toast.makeText(getApplicationContext(), "Prijateljstvo prihvaceno", Toast.LENGTH_LONG).show();
+                        closeActivity();
+                        finish();
+                    }
+                    else if(readMessage.equals("falsee"))
+                    {
+                        Toast.makeText(getApplicationContext(), "Prijateljstvo odbijeno", Toast.LENGTH_LONG).show();
+                        closeActivity();
+                        finish();
+                    }
+                    else {
+                        String url = "http://bomber.voidsoft.in.rs/addFriend.php";
+                        List<String> parameters = new ArrayList<String>();
+                        List<String> value = new ArrayList<String>();
+                        parameters.add("userID1");
+                        value.add(String.valueOf(user.getUserID()));
+                        parameters.add("userID2");
+                        value.add(readMessage);
+                        mAuthTask = new MyAsyncTaskInMaps(url, parameters, value, 0);//Zahtev za prijateljstvo upucen serveru
+                        mAuthTask.execute((Void) null);
+                    }
                     break;
                 //Ovaj deo mi je sad mnogo bitan jer mi tako salje neko svoje ime
                 case MESSAGE_DEVICE_NAME:
@@ -402,21 +418,17 @@
             ensureDiscoverable();
             return true;
         }
-
-
-
         return super.onOptionsItemSelected(item);
-    }
-
-    public void buttonRequests(View view)
-    {
-
     }
     public void buttonSend(View view)
     {
+
         sendMessage(String.valueOf(user.getUserID()));
     }
-
+    public void closeActivity()
+    {
+        this.finish();
+    }
 
             public class MyAsyncTaskInMaps extends AsyncTask<Void, Void, Boolean> {
 
@@ -427,7 +439,7 @@
                 public Object O;
                 public String Result;
                 public boolean Flag;
-
+                public int flag;
                 public String getResult() {
                     return Result;
                 }
@@ -444,7 +456,14 @@
                     O = null;
                     Flag = false;
                 }
-
+                public MyAsyncTaskInMaps(String url, List<String> parameters, List<String> value, int flag) {
+                    URL=url;
+                    Parameters=parameters;
+                    Value=value;
+                    O=null;
+                    Flag=false;
+                    this.flag=flag;
+                }
                 public MyAsyncTaskInMaps(String url, List<String> parameters, List<String> value, Object o) {
                     URL = url;
                     Parameters = parameters;
@@ -560,9 +579,22 @@
 
                     Flag = true;
                     if (success) {
-                        Toast.makeText(getApplicationContext(),"postali prijatelji",Toast.LENGTH_LONG).show();
+                        if(flag==1)
+                        {
+                            Toast.makeText(getApplicationContext(),"Vise niste prijatelji",Toast.LENGTH_LONG).show();
+                        }
+                        if(flag==0)
+                        {
+                            Toast.makeText(getApplicationContext(),"postali prijatelji",Toast.LENGTH_LONG).show();
+                            sendMessage("truee");
+                            closeActivity();
+                            finish();
+                        }
+
+                        //closeActivity();
                     } else {
                         Toast.makeText(getApplicationContext(),"nisu postali prijatelji",Toast.LENGTH_LONG).show();
+                        sendMessage("falsee");
                     }
                 }
 

@@ -113,15 +113,15 @@
             android:layout_height="wrap_content">
 
                 <Button android:id="@+id/buttonCapture"
-                    android:layout_height="60dp"
-                    android:layout_width="60dp"
+                    android:layout_height="88dp"
+                    android:layout_width="108dp"
                     android:onClick="buttonCapture"
                     android:background="@drawable/camera"
                     android:layout_marginLeft="20dp"/>
 
                 <Button android:id="@+id/buttonGallery"
-                    android:layout_height="60dp"
-                    android:layout_width="60dp"
+                    android:layout_height="88dp"
+                    android:layout_width="108dp"
                     android:onClick="buttonGallery"
                     android:background="@drawable/gallery"
                     android:layout_alignParentRight="true"

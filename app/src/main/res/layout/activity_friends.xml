@@ -12,7 +12,7 @@
         android:id="@+id/buttonRequests"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="buttonRequests"
+        android:onClick="buttonSend"
         android:text="BECOME FRIEND"
         android:textSize="20dp"
         android:textColor="#ffffffff"

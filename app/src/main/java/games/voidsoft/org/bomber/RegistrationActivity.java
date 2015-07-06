@@ -1,7 +1,9 @@
 package games.voidsoft.org.bomber;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,6 +17,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -55,17 +58,31 @@ public class RegistrationActivity extends Activity {
     EditText email;
     EditText password;
     private MyAsyncTaskInMaps mAuthTask = null;
+
+    public static SharedPreferences sharedpreferences;
+    public static final String MyPREFERENCES = "MyPrefs" ;
+    public static final String LatValue="LatKey";
+    public static final String LonValue="LonKey";
+    public static final String UsernameValue="UsernameKey";
+    public static final String UserIDValue="UserIDKey";
+    public static final String PasswordValue="PasswordKey";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration);
+        sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_APPEND);
         name=(EditText)findViewById(R.id.editTextname);
         username=(EditText)findViewById(R.id.editTextusername);
         email=(EditText)findViewById(R.id.editTextemail);
         password=(EditText)findViewById(R.id.editTextpassword);
         bmp=BitmapFactory.decodeResource(this.getResources(), R.drawable.defaultavatar);
     }
-
+    public void shared(String key, String value)
+    {
+        SharedPreferences.Editor editor = sharedpreferences.edit();
+        editor.putString(key, value);
+        editor.commit();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -140,13 +157,21 @@ public class RegistrationActivity extends Activity {
     }
     public void buttonOK(View view)
     {
+
+        try
+        {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+        }
+        catch (Exception ee)
+        {}
+
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         // Must compress the Image to reduce image size to make upload easy
         bmp.compress(Bitmap.CompressFormat.PNG, 50, stream);
         byte[] byte_arr = stream.toByteArray();
         // Encode Image to String
         String encodedString = Base64.encodeToString(byte_arr, 0);
-
         String url="http://bomber.voidsoft.in.rs/insertUser.php";
             List<String> parameters=new ArrayList<String>();
             List<String> value=new ArrayList<String>();
@@ -331,6 +356,9 @@ public class RegistrationActivity extends Activity {
             Flag=true;
             if (success) {
                 User user=new User(ID, name.getText().toString(),username.getText().toString(),password.getText().toString(),email.getText().toString(), "100", new Place(),new ArrayList<Integer>(),new ArrayList<Bomb>(),new ArrayList<Bomb>(),"http://bomber.voidsoft.in.rs/uploadedimages/"+username.getText().toString()+".bmp", bmp);
+                shared(UsernameValue,user.getUsername());
+                shared(UserIDValue,String.valueOf(user.getUserID()));
+                shared(PasswordValue,user.getPassword());
                 Singleton.getInstance().setUser(user);
                 Intent mainIntent = new Intent(RegistrationActivity.this,MapsActivity.class);
                 RegistrationActivity.this.startActivity(mainIntent);
