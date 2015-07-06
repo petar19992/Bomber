@@ -14,6 +14,7 @@
         import android.os.Message;
         import android.support.v7.app.ActionBarActivity;
         import android.util.Log;
+        import android.view.ContextMenu;
         import android.view.KeyEvent;
         import android.view.Menu;
         import android.view.MenuInflater;
@@ -100,6 +101,8 @@
     User user;
     private MyAsyncTaskInMaps mAuthTask = null;
 
+    int focusOnElement;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -128,7 +131,16 @@
         }
         catch (Exception ex)
         {}
-
+        lw.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener()
+        {
+            @Override
+            public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+                AdapterView.AdapterContextMenuInfo info=(AdapterView.AdapterContextMenuInfo) menuInfo;
+                menu.setHeaderTitle("Thinks you can do");
+                menu.add(0, 1, 1, "End friendship");
+                focusOnElement=((AdapterView.AdapterContextMenuInfo) menuInfo).position;
+            }
+        });
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -140,6 +152,28 @@
         }
 
     }
+            @Override
+            public boolean onContextItemSelected(MenuItem item) {
+                AdapterView.AdapterContextMenuInfo info=(AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
+                Bundle itemBundle=new Bundle();
+                itemBundle.putInt("position", info.position);
+                Intent i=null;
+                if(item.getItemId()==1)
+                {
+                    Friends friend=Singleton.getInstance().getListOfFriends().get(focusOnElement);
+                    String url="http://bomber.voidsoft.in.rs/deleteFriend.php";
+                    List<String> parameters=new ArrayList<String>();
+                    List<String> value=new ArrayList<String>();
+                    parameters.add("userID1");
+                    value.add(String.valueOf(user.getUserID()));
+                    parameters.add("userID2");
+                    value.add(String.valueOf(friend.getFriendID()));
+                    mAuthTask = new MyAsyncTaskInMaps(url, parameters, value);
+                    mAuthTask.execute((Void) null);
+                }
+
+                return super.onContextItemSelected(item);
+            }
     @Override
     public void onStart() {
         super.onStart();
@@ -176,28 +210,8 @@
 
     private void setupChat() {
         Log.d(TAG, "setupChat()");
-/*
-        // Initialize the array adapter for the conversation thread
-        mConversationArrayAdapter = new ArrayAdapter<String>(this, R.layout.message);
-        mConversationView = (ListView) findViewById(R.id.in);
-        mConversationView.setAdapter(mConversationArrayAdapter);
-        // Initialize the compose field with a listener for the return key
-        mOutEditText = (EditText) findViewById(R.id.edit_text_out);
-        mOutEditText.setOnEditorActionListener(mWriteListener);
-        // Initialize the send button with a listener that for click events
-        mSendButton = (Button) findViewById(R.id.button_send);
-        mSendButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                // Send a message using content of the edit text widget
-                TextView view = (TextView) findViewById(R.id.edit_text_out);
-                String message = view.getText().toString();
-                sendMessage(message);
-            }
-        });
-*/
         // Initialize the BluetoothChatService to perform bluetooth connections
         mChatService = new BluetoothChatService(this, mHandler);
-
         // Initialize the buffer for outgoing messages
         mOutStringBuffer = new StringBuffer("");
     }

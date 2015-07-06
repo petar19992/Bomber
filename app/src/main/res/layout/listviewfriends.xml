@@ -1,42 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="#ff3d4ba0">
 
-    <TableLayout
-        android:id="@+id/layoutButtons"
-        android:layout_width="fill_parent"
-        android:layout_height="80dp"
-        android:orientation="horizontal"
-        android:gravity="bottom"
 
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
-
-        <TableRow
-
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:id="@+id/tableRow"
-            >
             <ImageView
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:id="@+id/imageViewFriendsAvatar"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true" />
+                android:layout_alignParentStart="true"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginBottom="10dp"
+                />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="Large Text"
                 android:id="@+id/textViewFriendsUsername"
-                android:layout_alignParentTop="true"
-
                 android:gravity="center"
-                android:textSize="40dp"/>
-        </TableRow>
-    </TableLayout>
+                android:textSize="40dp"
+                android:textColor="#ffffffff"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignBottom="@+id/imageViewFriendsAvatar"
+                android:layout_toRightOf="@+id/imageViewFriendsAvatar"
+                android:layout_toEndOf="@+id/imageViewFriendsAvatar" />
 
 </RelativeLayout>

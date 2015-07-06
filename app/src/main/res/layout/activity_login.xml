@@ -9,38 +9,65 @@
 
     <!-- Login progress -->
     <ProgressBar android:id="@+id/login_progress" style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp" android:visibility="gone" />
+        android:layout_width="fill_parent" android:layout_height="fill_parent"
+        android:layout_marginBottom="8dp" android:visibility="gone"
+        android:layout_gravity="center"/>
 
     <ScrollView android:id="@+id/login_form" android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:focusableInTouchMode="false"
+        android:background="#ffe7ecff">
 
         <LinearLayout android:id="@+id/email_login_form" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:orientation="vertical"
-            android:layout_gravity="center">
+            android:layout_height="fill_parent" android:orientation="vertical"
+            android:layout_gravity="center_vertical">
 
-            <AutoCompleteTextView android:id="@+id/email" android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:hint="@string/prompt_email"
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/imageView2"
+                android:background="@drawable/splashscreen"
+                android:layout_gravity="center"
+                android:layout_marginBottom="35dp"/>
+
+            <AutoCompleteTextView android:id="@+id/email" android:layout_width="fill_parent"
+                android:layout_height="50dp" android:hint="@string/prompt_email"
                 android:inputType="textEmailAddress" android:maxLines="1"
-                android:singleLine="true" />
+                android:singleLine="true"
+                android:background="@drawable/textbox"
+                android:gravity="center"/>
 
-            <EditText android:id="@+id/password" android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:hint="@string/prompt_password"
+            <EditText android:id="@+id/password" android:layout_width="fill_parent"
+                android:layout_height="50dp" android:hint="@string/prompt_password"
                 android:imeActionId="@+id/login"
                 android:imeActionLabel="@string/action_sign_in_short"
                 android:imeOptions="actionUnspecified" android:inputType="textPassword"
-                android:maxLines="1" android:singleLine="true" />
+                android:maxLines="1" android:singleLine="true"
+                android:background="@drawable/textbox"
+                android:gravity="center"/>
             <TableLayout android:id="@+id/login_buttons" android:layout_width="match_parent"
                 android:layout_height="wrap_content" android:orientation="horizontal">
                 <Button android:id="@+id/email_sign_in_button" style="?android:textAppearanceSmall"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_width="176dp" android:layout_height="wrap_content"
                     android:layout_marginTop="16dp" android:text="@string/action_sign_in"
-                    android:textStyle="bold" />
-                <Button android:id="@+id/email_register_button" style="?android:textAppearanceSmall"
+                    android:textStyle="bold"
+                    android:background="@drawable/button"
+                    android:textColor="#ffffffff"
+                    android:layout_marginLeft="45dp"
+                    android:layout_marginRight="45dp"
+                    android:textSize="20dp" />
+                <Button android:id="@+id/email_register_button"
                     android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:layout_marginTop="16dp" android:text="@string/action_register"
                     android:textStyle="bold"
-                    android:onClick="buttonRegister"/>
+                    android:onClick="buttonRegister"
+                    android:textIsSelectable="false"
+                    android:textSize="20dp"
+                    android:textColor="#ff3d4ba0"
+                    android:gravity="center"
+                    android:background="#00000000"
+                    android:layout_marginLeft="45dp"
+                    android:layout_marginRight="45dp"/>
                 </TableLayout>
 
 

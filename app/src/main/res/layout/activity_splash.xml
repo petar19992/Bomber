@@ -9,7 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/imageView"
-        android:src="@drawable/bomb"
+        android:src="@drawable/splashscreen"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:layout_marginRight="137dp"

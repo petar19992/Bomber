@@ -457,9 +457,9 @@ public final class UpdateService extends Service implements LocationListener{
             Flag=true;
             if (success) {
                 if(status.getC4KillMe()!=0)
-                    displayNotification(new NotificationProperties(R.drawable.bomb_mini,"OUCH",String.valueOf(status.getC4KillMe())+" C4 bombs kills YOU",Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.explosion),MapsActivity.class,100));
+                    displayNotification(new NotificationProperties(R.drawable.eksplozija,"OUCH",String.valueOf(status.getC4KillMe())+" C4 bombs kills YOU",Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.explosion),MapsActivity.class,100));
                 if(status.getMineKillMe()!=0)
-                    displayNotification(new NotificationProperties(R.drawable.bomb_mini,"OUCH",String.valueOf(status.getMineKillMe())+" MINES kills YOU",Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.explosion),MapsActivity.class,200));
+                    displayNotification(new NotificationProperties(R.drawable.eksplozija,"OUCH",String.valueOf(status.getMineKillMe())+" MINES kills YOU",Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.explosion),MapsActivity.class,200));
                 if(status.getC4IKill()!=0)
                     displayNotification(new NotificationProperties(R.drawable.winflag,"YEAH !",String.valueOf(status.getC4IKill())+" peoples were killed by YOUR C4 bombs",Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.win),MapsActivity.class,300));
                 if(status.getMineIKill()!=0)

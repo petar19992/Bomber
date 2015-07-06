@@ -508,7 +508,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
             if (success) {
                 //finish();
-                dialog.dismiss();
+                try {
+                    dialog.dismiss();
+                }catch (Exception eee)
+                {}
                 shared(UsernameValue,user.getUsername());
                 shared(PasswordValue,user.getPassword());
                 Singleton.getInstance().setUser(user);

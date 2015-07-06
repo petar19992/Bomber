@@ -106,6 +106,7 @@ public class MapsActivity extends ActionBarActivity {
     View child;
     ListView listView;
     ContextMenuAdapter adapter;
+    Intent intentForService;
 
     User user;
     Status status;
@@ -170,7 +171,8 @@ public class MapsActivity extends ActionBarActivity {
         //googleMap.addMarker(new MarkerOptions().position(new LatLng(43.337165, 21.876526)).title("Find me here !"));
 
         //startService(new Intent(UpdateService.ACTION_UPDATE));
-        startService(new Intent(this, UpdateService.class));
+        intentForService=new Intent(this, UpdateService.class);
+        startService(intentForService);
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("TIME_TICK"));
     }
     //Funkcija u koju se ulazi na svaki minut
@@ -256,9 +258,11 @@ public class MapsActivity extends ActionBarActivity {
             dialog = ProgressDialog.show(this, "Loading", "Please wait...", true);
             //http://bomber.voidsoft.in.rs/RangList.php
         }
-        else if(id==R.id.settings)
+        else if(id==R.id.logOut)
         {
-
+            sharedpreferences.edit().clear().commit();
+            stopService(intentForService);
+            this.finish();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -282,12 +286,12 @@ public class MapsActivity extends ActionBarActivity {
             if(isMine)
             googleMap.addMarker(new MarkerOptions().position(position)
                     .icon(BitmapDescriptorFactory.fromResource(
-                            R.drawable.mine_mini))
+                            R.drawable.mojamina))
                     .anchor(0.5f, 0.5f));
             else
                 googleMap.addMarker(new MarkerOptions().position(position)
                         .icon(BitmapDescriptorFactory.fromResource(
-                                R.drawable.minefriend))
+                                R.drawable.minanadrugara))
                         .anchor(0.5f, 0.5f));
         }
         else if(type.equals("C4"))
@@ -295,13 +299,13 @@ public class MapsActivity extends ActionBarActivity {
             if(isMine)
             googleMap.addMarker(new MarkerOptions().position(position)
                     .icon(BitmapDescriptorFactory.fromResource(
-                            R.drawable.bomb_mini))
+                            R.drawable.mojabomba))
                             // Specifies the anchor to be at a particular point in the marker image.
                     .anchor(0.5f, 0.5f));
             else
                 googleMap.addMarker(new MarkerOptions().position(position)
                         .icon(BitmapDescriptorFactory.fromResource(
-                                R.drawable.c4friend))
+                                R.drawable.bombanadrugara))
                                 // Specifies the anchor to be at a particular point in the marker image.
                         .anchor(0.5f, 0.5f));
         }
@@ -317,9 +321,9 @@ public class MapsActivity extends ActionBarActivity {
 
         contextMenuItems = new ArrayList<ContextMenuItem>();
         contextMenuItems.add(new ContextMenuItem(getResources().getDrawable(
-                R.drawable.mine), "Place Mine"));
+                R.drawable.mojaminabig), "Place Mine"));
         contextMenuItems.add(new ContextMenuItem(getResources().getDrawable(
-                R.drawable.bomb), "Place C4"));
+                R.drawable.mojabombabig), "Place C4"));
 
         adapter = new ContextMenuAdapter(this,
                 contextMenuItems);
@@ -343,7 +347,7 @@ public class MapsActivity extends ActionBarActivity {
                 {
                     googleMap.addMarker(new MarkerOptions().position(myLoc)
                             .icon(BitmapDescriptorFactory.fromResource(
-                                    R.drawable.mine_mini))
+                                    R.drawable.mojamina))
                                     // Specifies the anchor to be at a particular point in the marker image.
                             .anchor(0.5f, 0.5f));
                     bomb.setType("MINE");
@@ -371,7 +375,7 @@ public class MapsActivity extends ActionBarActivity {
                 {
                     googleMap.addMarker(new MarkerOptions().position(myLoc)
                             .icon(BitmapDescriptorFactory.fromResource(
-                                    R.drawable.bomb_mini))
+                                    R.drawable.mojabomba))
                                     // Specifies the anchor to be at a particular point in the marker image.
                             .anchor(0.5f, 0.5f));
                     bomb.setType("C4");
@@ -710,9 +714,9 @@ public class MapsActivity extends ActionBarActivity {
                     else if(flag==2)
                     {
                         if(status.getC4KillMe()!=0)
-                            displayNotification(new NotificationProperties(R.drawable.bomb_mini,"OUCH",String.valueOf(status.getC4KillMe())+" C4 bombs kills YOU", Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.explosion),MapsActivity.class,100));
+                            displayNotification(new NotificationProperties(R.drawable.eksplozija,"OUCH",String.valueOf(status.getC4KillMe())+" C4 bombs kills YOU", Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.explosion),MapsActivity.class,100));
                         if(status.getMineKillMe()!=0)
-                            displayNotification(new NotificationProperties(R.drawable.bomb_mini,"OUCH",String.valueOf(status.getMineKillMe())+" MINES kills YOU",Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.explosion),MapsActivity.class,200));
+                            displayNotification(new NotificationProperties(R.drawable.eksplozija,"OUCH",String.valueOf(status.getMineKillMe())+" MINES kills YOU",Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.explosion),MapsActivity.class,200));
                         if(status.getC4IKill()!=0)
                             displayNotification(new NotificationProperties(R.drawable.winflag,"YEAH !",String.valueOf(status.getC4IKill())+" peoples were killed by YOUR C4 bombs",Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.win),MapsActivity.class,300));
                         if(status.getMineIKill()!=0)
