@@ -14,6 +14,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
@@ -43,6 +44,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import games.voidsoft.org.bomber.LoginActivity;
 import games.voidsoft.org.bomber.MapsActivity;
 import games.voidsoft.org.bomber.R;
 import games.voidsoft.org.bomber.objects.Singleton;
@@ -158,9 +160,6 @@ public final class UpdateService extends Service implements LocationListener{
                 }else{
                     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, UpdateService.this);
                 }
-
-
-
                 String url="http://bomber.voidsoft.in.rs/updateUserLoc.php";
                 List<String> parameters=new ArrayList<String>();
                 List<String> value=new ArrayList<String>();
@@ -422,6 +421,15 @@ public final class UpdateService extends Service implements LocationListener{
                     status=gson.fromJson(obj,games.voidsoft.org.bomber.objects.Status.class);
 
 
+                    result = POST("http://bomber.voidsoft.in.rs/updateUserWin.php", Parameters, Value);
+                    Result=result;
+                    parser = new JsonParser();
+                    obj = parser.parse(result).getAsJsonObject();
+                    gson=  new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+                    games.voidsoft.org.bomber.objects.Status status2=gson.fromJson(obj,games.voidsoft.org.bomber.objects.Status.class);
+                    status.setC4IKill(status2.getC4IKill());
+                    status.setMineIKill(status2.getMineIKill());
+
                     List<String> parameters=new ArrayList<String>();
                     List<String> value=new ArrayList<String>();
                     parameters.add("username");
@@ -437,8 +445,6 @@ public final class UpdateService extends Service implements LocationListener{
                     //user = gson.fromJson(json, User.class);
                     user2 =gson.fromJson(obj,User.class);
                     Singleton.getInstance().setUser(user2);
-
-
                     return true;
                 }
                 catch (Exception ex)

@@ -210,6 +210,12 @@ public class MapsActivity extends ActionBarActivity {
                     placeBombAt(new LatLng(b.getPlace().getLatitude(),b.getPlace().getLongitude()),b.getType(),isMine);
                 //googleMap.addMarker(new MarkerOptions().position(new LatLng(b.getPlace().getLatitude(),b.getPlace().getLongitude())).title(b.getType()+" placed at " + b.getTimePlanted()));
             }
+            try {
+                MenuItem rec2 =(MenuItem) findViewById(R.id.money);
+                rec2.setTitle(user.getMoney());
+            }catch (Exception ee)
+            {}
+
         }
     };
     //Funkcija u koju ulazi kada se promeni lokacija (obicno je 4 sekunde)
